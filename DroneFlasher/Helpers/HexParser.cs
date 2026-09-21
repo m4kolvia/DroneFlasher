@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
+﻿using System.Globalization;
 using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace DroneFlasher.Services;
+namespace DroneFlasher.Helpers;
 
 public class HexMemoryBlock
 {
@@ -53,7 +49,6 @@ public static class HexParser
             }
         }
 
-        // Групуємо послідовні байти у суцільні блоки
         var blocks = new List<HexMemoryBlock>();
         uint? currentStart = null;
         var currentData = new List<byte>();

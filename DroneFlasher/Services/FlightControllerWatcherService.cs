@@ -1,25 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Management;
+﻿using System.Management;
+using DroneFlasher.Options;
 
 namespace DroneFlasher.Services;
 
-public static class DeviceWatcherService
+public class FlightControllerWatcherService
 {
-    private static readonly string[] AllowedFlightControllerSignatures = new[]
-    {
-        "VID_0483&PID_5740", // STM32 VCP
-        "VID_2E3C&PID_5740", // AT32 VCP
-        "VID_28E9&PID_018A", // GD32 VCP
-        "VID_314B&PID_5740", // APM32 VCP
-        "VID_3997&PID_5740", // X32 VCP
-        "VID_10C4&PID_EA60", // CP210x USB bridge
-        "VID_1A86&PID_7523", // CH340 USB bridge
-        "VID_2341"           // Arduino
-    };
+    private readonly string[] _signatures;
 
-    public static List<string> GetFlightControllerPorts()
+    public FlightControllerWatcherService(FlightControllerOptions options)
+    {
+        _signatures = options.AllowedSignatures;
+    }
+
+    public List<string> GetFlightControllerPorts()
     {
         var matchedPorts = new List<string>();
 
@@ -34,7 +27,7 @@ public static class DeviceWatcherService
                 string pnpId = device["PNPDeviceID"]?.ToString() ?? string.Empty;
                 string caption = device["Caption"]?.ToString() ?? string.Empty;
 
-                bool isDrone = AllowedFlightControllerSignatures.Any(sig =>
+                bool isDrone = _signatures.Any(sig =>
                     pnpId.Contains(sig, StringComparison.OrdinalIgnoreCase));
 
                 if (isDrone)
@@ -52,10 +45,7 @@ public static class DeviceWatcherService
                 }
             }
         }
-        catch
-        {
-            // Повертаємо порожній список при тимчасовій зайнятості WMI
-        }
+        catch { }
 
         return matchedPorts;
     }

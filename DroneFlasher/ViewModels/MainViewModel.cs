@@ -1,10 +1,11 @@
-﻿using DroneFlasher.Models;
+﻿using DroneFlasher.Helpers;
+using DroneFlasher.Models;
 using DroneFlasher.Services;
 using Microsoft.Win32;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Ports;
-using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -14,8 +15,19 @@ namespace DroneFlasher.ViewModels;
 
 public class MainViewModel : BaseViewModel
 {
-    private readonly SerialService _serialService = new();
-    private readonly DfuService _dfuService = new();
+    private string? _deviceAwaitingDisconnect;
+    private bool _isScanning;
+    private bool _isBusy;
+    private string[] _knownPorts = [];
+    private string[] _lastSystemPorts = [];
+    private string _dumpPath = string.Empty;
+    private string _firmwarePath = string.Empty;
+    private bool _isAutoFlashEnabled;
+    private DateTime _lastActivityTime;
+    private readonly DispatcherTimer _scanTimer;
+
+    public ObservableCollection<LogEntry> LogEntries { get; } = new();
+
     public ICommand CopyLogCommand { get; }
     public ICommand TestDfuCommand { get; }
     public ICommand SelectDumpCommand { get; }
@@ -23,152 +35,33 @@ public class MainViewModel : BaseViewModel
     public ICommand ManualFlashCommand { get; }
     public ICommand ClearLogCommand { get; }
 
-    private string? _justFinishedPort;
+    private readonly ConfigurationService _configService;
+    private readonly DfuService _dfuService;
+    private readonly DfuWatcherService _dfuWatcherService;
+    private readonly FlightControllerWatcherService _fcWatcherService;
 
-    private readonly DispatcherTimer _scanTimer;
-
-    private string[] _knownPorts = [];
-    private string[] _lastSystemPorts = [];
-
-    private string _dumpPath = string.Empty;
-    private string _firmwarePath = string.Empty;
-
-    private bool _isAutoFlashEnabled;
-
-    private string _statusText =
-        "Очікування налаштувань...";
-
-    private Brush _statusBrush =
-        Brushes.Gray;
-
-    private bool _isBusy;
-
-    public bool IsBusy
+    public MainViewModel(
+        ConfigurationService configService,
+        DfuService dfuService,
+        DfuWatcherService dfuWatcherService,
+        FlightControllerWatcherService fcWatcherService)
     {
-        get => _isBusy;
+        _configService = configService;
+        _dfuService = dfuService;
+        _dfuWatcherService = dfuWatcherService;
+        _fcWatcherService = fcWatcherService;
 
-        set
-        {
-            if (SetField(ref _isBusy, value))
-            {
-                CommandManager.InvalidateRequerySuggested();
-            }
-        }
-    }
-
-    public string DumpPath
-    {
-        get => _dumpPath;
-
-        set => SetField(
-            ref _dumpPath,
-            value);
-    }
-
-    public string FirmwarePath
-    {
-        get => _firmwarePath;
-
-        set => SetField(
-            ref _firmwarePath,
-            value);
-    }
-
-    public bool IsAutoFlashEnabled
-    {
-        get => _isAutoFlashEnabled;
-
-        set
-        {
-            if (!SetField(
-                    ref _isAutoFlashEnabled,
-                    value))
-            {
-                return;
-            }
-
-            if (value)
-            {
-                UpdateStatus(
-                    "Пошук вже підключеного дрона...",
-                    Brushes.DodgerBlue);
-
-                // ВАЖЛИВО:
-                // одразу перевіряємо, чи дрон уже підключений.
-                _ = TryTriggerPipelineForAlreadyConnectedDeviceAsync();
-            }
-            else
-            {
-                UpdateStatus(
-                    "Автозавантаження вимкнено",
-                    Brushes.Gray);
-            }
-        }
-    }
-
-    public string StatusText
-    {
-        get => _statusText;
-
-        set => SetField(
-            ref _statusText,
-            value);
-    }
-
-    public Brush StatusBrush
-    {
-        get => _statusBrush;
-
-        set => SetField(
-            ref _statusBrush,
-            value);
-    }
-
-    public ObservableCollection<LogEntry> LogEntries { get; } = new();
-
-    public MainViewModel()
-    {
-        CopyLogCommand =
-    new RelayCommand(
-        _ => CopyEntireLog());
-
-        SelectDumpCommand =
-            new RelayCommand(
-                _ => SelectFile(
-                    p => DumpPath = p,
-                    "TXT files (*.txt)|*.txt"));
-
-        SelectFirmwareCommand =
-            new RelayCommand(
-                _ => SelectFile(
-                    p => FirmwarePath = p,
-                    "HEX/BIN files (*.hex;*.bin)|*.hex;*.bin"));
-
-        ManualFlashCommand =
-            new RelayCommand(
-                async _ =>
-                    await ExecuteManualFlashAsync(),
-                _ => !IsBusy);
-
-        TestDfuCommand =
-            new RelayCommand(
-                async _ =>
-                    await ExecuteTestDfuAsync(),
-                _ => !IsBusy);
-
-        ClearLogCommand =
-            new RelayCommand(
-                _ => LogEntries.Clear());
+        CopyLogCommand = new RelayCommand(_ => CopyEntireLog());
+        SelectDumpCommand = new RelayCommand(_ => SelectFile(p => DumpPath = p, "TXT files (*.txt)|*.txt"));
+        SelectFirmwareCommand = new RelayCommand(_ => SelectFile(p => FirmwarePath = p, "HEX files (*.hex)|*.hex"));
+        ManualFlashCommand = new RelayCommand(async _ => await ExecuteManualFlashAsync(), _ => !IsBusy);
+        TestDfuCommand = new RelayCommand(async _ => await ExecuteTestDfuAsync(), _ => !IsBusy);
+        ClearLogCommand = new RelayCommand(_ => LogEntries.Clear());
 
         try
         {
-            _knownPorts =
-                DeviceWatcherService
-                    .GetFlightControllerPorts()
-                    .ToArray();
-
-            _lastSystemPorts =
-                SerialPort.GetPortNames();
+            _knownPorts = _fcWatcherService.GetFlightControllerPorts().ToArray();
+            _lastSystemPorts = SerialPort.GetPortNames();
         }
         catch
         {
@@ -176,197 +69,117 @@ public class MainViewModel : BaseViewModel
             _lastSystemPorts = [];
         }
 
-        _scanTimer =
-            new DispatcherTimer
-            {
-                Interval =
-                    TimeSpan.FromMilliseconds(500)
-            };
-
-        _scanTimer.Tick +=
-            ScanTimer_Tick;
-
-        _scanTimer.Start();
+        _scanTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
+        _scanTimer.Tick += ScanTimer_Tick;
     }
 
-    private void CopyEntireLog()
+    public void StartMonitoring() => _scanTimer.Start();
+
+    #region Bindable Properties
+    public bool IsBusy
     {
-
-            string text =
-                string.Join(
-                    Environment.NewLine,
-                    LogEntries.Select(
-                        entry => entry.Text));
-
-            Clipboard.SetText(text);
-
-        
-
+        get => _isBusy;
+        set
+        {
+            if (SetField(ref _isBusy, value))
+                CommandManager.InvalidateRequerySuggested();
+        }
     }
 
-    // ================================================================
-    // ПОШУК ВЖЕ ПІДКЛЮЧЕНОГО ДРОНА
-    // ================================================================
-
-    private async Task TryTriggerPipelineForAlreadyConnectedDeviceAsync()
+    private string _statusText = "Очікування налаштувань...";
+    public string StatusText
     {
-        if (IsBusy ||
-            !IsAutoFlashEnabled)
+        get => _statusText;
+        set => SetField(ref _statusText, value);
+    }
+
+    private Brush _statusBrush = Brushes.Gray;
+    public Brush StatusBrush
+    {
+        get => _statusBrush;
+        set => SetField(ref _statusBrush, value);
+    }
+
+    public bool IsAutoFlashEnabled
+    {
+        get => _isAutoFlashEnabled;
+        set
         {
-            return;
-        }
+            if (!SetField(ref _isAutoFlashEnabled, value)) return;
 
-        bool hasFirmware =
-            !string.IsNullOrWhiteSpace(FirmwarePath) &&
-            File.Exists(FirmwarePath);
-
-        bool hasDump =
-            !string.IsNullOrWhiteSpace(DumpPath) &&
-            File.Exists(DumpPath);
-
-        if (!hasFirmware && !hasDump)
-        {
-            UpdateStatus(
-                "Оберіть прошивку або конфігурацію.",
-                Brushes.Orange);
-
-            return;
-        }
-
-        // ------------------------------------------------------------
-        // 1. Спочатку перевіряємо Flight Controller через
-        //    DeviceWatcherService.
-        // ------------------------------------------------------------
-
-        var existingPorts =
-            DeviceWatcherService
-                .GetFlightControllerPorts()
-                .ToArray();
-
-        if (existingPorts.Length > 0)
-        {
-            string targetPort =
-                existingPorts[0];
-
-            if (targetPort != _justFinishedPort)
+            if (value)
             {
-                _scanTimer.Stop();
+                _deviceAwaitingDisconnect = null;
+                _lastActivityTime = DateTime.UtcNow;
 
-                try
+                bool hasFirmware = !string.IsNullOrWhiteSpace(FirmwarePath) && File.Exists(FirmwarePath);
+                bool hasDump = !string.IsNullOrWhiteSpace(DumpPath) && File.Exists(DumpPath);
+
+                if (!hasFirmware && !hasDump)
                 {
-                    await ExecutePipelineAsync(
-                        targetPort);
+                    UpdateStatus("Оберіть прошивку або конфігурацію!", Brushes.Orange);
                 }
-                finally
+                else
                 {
-                    ResetKnownPorts();
-
-                    await Task.Delay(1000);
-
-                    if (IsAutoFlashEnabled)
-                        _scanTimer.Start();
+                    UpdateStatus("Пошук підключеного дрона...", Brushes.DodgerBlue);
                 }
-
-                return;
             }
-        }
-
-        // ------------------------------------------------------------
-        // 2. Якщо DeviceWatcher не знайшов FC,
-        //    перевіряємо всі COM-порти через CLI.
-        // ------------------------------------------------------------
-
-        if (hasDump)
-        {
-            UpdateStatus(
-                "Пошук польотного контролера серед COM-портів...",
-                Brushes.DodgerBlue);
-
-            string? foundPort = null;
-
-            try
+            else
             {
-                foundPort =
-                    await _serialService
-                        .FindFlightControllerPortAsync();
-            }
-            catch
-            {
-                // Якщо не знайшли — нижче продовжиться
-                // звичайне автоматичне сканування.
-            }
-
-            if (!string.IsNullOrEmpty(foundPort) &&
-                foundPort != _justFinishedPort)
-            {
-                _scanTimer.Stop();
-
-                try
-                {
-                    AddLog(
-                        $"[AUTO] Знайдено польотний контролер: {foundPort}",
-                        Brushes.LightGreen);
-
-                    await ExecutePipelineAsync(
-                        foundPort);
-                }
-                finally
-                {
-                    ResetKnownPorts();
-
-                    await Task.Delay(1000);
-
-                    if (IsAutoFlashEnabled)
-                        _scanTimer.Start();
-                }
-
-                return;
-            }
-        }
-
-        // ------------------------------------------------------------
-        // 3. Якщо є прошивка — перевіряємо DFU.
-        // ------------------------------------------------------------
-
-        if (hasFirmware)
-        {
-            bool inDfu = false;
-
-            try
-            {
-                inDfu =
-                    await _dfuService
-                        .IsDeviceInDfuModeAsync();
-            }
-            catch
-            {
-            }
-
-            if (inDfu)
-            {
-                _scanTimer.Stop();
-
-                try
-                {
-                    await ExecutePipelineAsync(
-                        portName: null);
-                }
-                finally
-                {
-                    ResetKnownPorts();
-
-                    await Task.Delay(2000);
-
-                    if (IsAutoFlashEnabled)
-                        _scanTimer.Start();
-                }
+                UpdateStatus("Автозавантаження вимкнено", Brushes.Gray);
             }
         }
     }
-    // ================================================================
-    // ТЕСТ DFU
-    // ================================================================
 
+    public string DumpPath
+    {
+        get => _dumpPath;
+        set
+        {
+            if (SetField(ref _dumpPath, value))
+            {
+                OnConfigurationFilesChanged();
+            }
+        }
+    }
+
+    public string FirmwarePath
+    {
+        get => _firmwarePath;
+        set
+        {
+            if (SetField(ref _firmwarePath, value))
+            {
+                OnConfigurationFilesChanged();
+            }
+        }
+    }
+
+    private void OnConfigurationFilesChanged()
+    {
+        if (IsAutoFlashEnabled && !IsBusy)
+        {
+            bool hasFirmware = !string.IsNullOrWhiteSpace(FirmwarePath) && File.Exists(FirmwarePath);
+            bool hasDump = !string.IsNullOrWhiteSpace(DumpPath) && File.Exists(DumpPath);
+
+            if (hasFirmware || hasDump)
+            {
+                _lastActivityTime = DateTime.UtcNow;
+                _deviceAwaitingDisconnect = null;
+                UpdateStatus("Пошук підключеного дрона...", Brushes.DodgerBlue);
+
+                _ = ProcessCurrentDeviceAsync();
+            }
+            else
+            {
+                UpdateStatus("Оберіть прошивку або конфігурацію!", Brushes.Orange);
+            }
+        }
+    }
+
+    #endregion
+
+    #region Test DFU
     private async Task ExecuteTestDfuAsync()
     {
         if (IsBusy) return;
@@ -375,318 +188,362 @@ public class MainViewModel : BaseViewModel
 
         try
         {
-            // 1. Пошук COM-порту
             UpdateStatus("Пошук COM-порту...", Brushes.Orange);
-            var ports = DeviceWatcherService.GetFlightControllerPorts().ToArray();
+            var ports = await Task.Run(() => _fcWatcherService.GetFlightControllerPorts().ToArray());
 
             if (ports.Length == 0)
             {
                 UpdateStatus("✖ COM-порт не знайдено", Brushes.IndianRed);
-                AddLog("[TEST] Немає підключених COM-портів для ребуту.", Brushes.IndianRed);
+                AddLog("[TEST] Немає підключених COM-портів.", Brushes.IndianRed);
                 return;
             }
 
             string targetPort = ports[0];
-            AddLog($"[TEST] Знайдено COM-порт: {targetPort}", Brushes.LightGreen);
+            AddLog($"[TEST] Знайдено порт: {targetPort}", Brushes.LightGreen);
 
-            // 2. Вхід у Bootloader
-            UpdateStatus($"Переведення {targetPort} у Bootloader...", Brushes.Orange);
-            AddLog($"[TEST] Надсилаємо команду в {targetPort}...", Brushes.Orange);
+            var statusProgress = new Progress<string>(msg => UpdateStatus(msg, Brushes.Orange));
+            var logProgress = new Progress<LogEntry>(AddLogEntry);
 
-            try
-            {
-                await _dfuService.RebootToBootloaderAsync(targetPort);
-            }
-            catch
-            {
-                // Обрив зв'язку при стрибку в бутлоадер — це штатна поведінка
-            }
+            bool isReady = await _dfuService.EnterBootloaderAndWaitAsync(targetPort, statusProgress, logProgress);
 
-            AddLog("[TEST] Команду надіслано. Очікування перемикання USB шини...", Brushes.LightBlue);
-
-            // 3. Очікування появи пристрою в системі
-            bool inDfu = false;
-            for (int i = 0; i < 25; i++)
-            {
-                await Task.Delay(400);
-                inDfu = await _dfuService.IsDeviceInDfuModeAsync();
-                if (inDfu) break;
-            }
-
-            if (!inDfu)
-            {
-                UpdateStatus("✖ Пристрій не перейшов у DFU", Brushes.IndianRed);
-                AddLog("[TEST] Пристрій 0483:DF11 не знайдено серед PnP пристроїв.", Brushes.IndianRed);
-                return;
-            }
-
-            AddLog("[TEST] ✓ STM32 Bootloader зафіксовано в системі!", Brushes.LimeGreen);
-
-            // 4. Перевірка доступності через LibUsbDotNet
-            UpdateStatus("Перевірка доступу до DFU...", Brushes.Orange);
-            var progress = new Progress<string>(msg => AddLog(msg, Brushes.Gray));
-
-            var statusInfo = await _dfuService.QueryDfuStatusAsync(progress);
-
-            if (statusInfo.State == 2) // STATE_DFU_IDLE
-            {
-                UpdateStatus("✔ DFU готовий до роботи (IDLE)", Brushes.LimeGreen);
-                AddLog($"[TEST] УСПІХ: Стан {statusInfo.State} (dfuIDLE). Плата готова до прошивки!", Brushes.LimeGreen);
-            }
+            if (isReady)
+                UpdateStatus("✔ Тест успішний: DFU готовий", Brushes.LimeGreen);
             else
-            {
-                UpdateStatus($"⚠ DFU стан: {statusInfo.State}", Brushes.Orange);
-                AddLog($"[TEST] Стан: {statusInfo.State}, статус: {statusInfo.Status}.", Brushes.Orange);
-            }
+                UpdateStatus("✖ Тест не пройдено", Brushes.IndianRed);
         }
         catch (Exception ex)
         {
             UpdateStatus($"Збій тесту: {ex.Message}", Brushes.IndianRed);
-            AddLog($"[TEST] Помилка доступу до DFU: {ex.Message}", Brushes.IndianRed);
+            AddLog($"[TEST] Помилка: {ex.Message}", Brushes.IndianRed);
         }
         finally
         {
             IsBusy = false;
         }
     }
+    #endregion
 
-    // ================================================================
-    // РУЧНИЙ ЗАПУСК
-    // ================================================================
+    private readonly SemaphoreSlim _pipelineLock = new(1, 1);
 
+
+    #region Manual Flashing
     private async Task ExecuteManualFlashAsync()
     {
-        if (IsBusy)
-            return;
-
+        if (IsBusy) return;
         _scanTimer.Stop();
 
         try
         {
-            _justFinishedPort = null;
-
-            var ports =
-                DeviceWatcherService
-                    .GetFlightControllerPorts()
-                    .ToArray();
+            var ports = await Task.Run(() => _fcWatcherService.GetFlightControllerPorts().ToArray());
 
             if (ports.Length > 0)
             {
-                await ExecutePipelineAsync(
-                    ports.First());
-
+                await ExecutePipelineAsync(ports[0]);
                 return;
             }
 
-            // Додатковий пошук через CLI.
-            if (!string.IsNullOrWhiteSpace(DumpPath))
+            if (!string.IsNullOrWhiteSpace(FirmwarePath) && await _dfuWatcherService.IsDeviceInDfuModeAsync())
             {
-                string? foundPort =
-                    await _serialService
-                        .FindFlightControllerPortAsync();
-
-                if (!string.IsNullOrEmpty(foundPort))
-                {
-                    await ExecutePipelineAsync(
-                        foundPort);
-
-                    return;
-                }
-            }
-
-            // Перевірка DFU.
-            if (!string.IsNullOrWhiteSpace(FirmwarePath) &&
-                await _dfuService.IsDeviceInDfuModeAsync())
-            {
-                await ExecutePipelineAsync(
-                    portName: null);
-
+                await ExecutePipelineAsync(portName: null);
                 return;
             }
 
-            UpdateStatus(
-                "Помилка: дрон не знайдено (перевірте USB або COM-порт)!",
-                Brushes.IndianRed);
+            UpdateStatus("Помилка: дрон не знайдено (перевірте підключення)!", Brushes.IndianRed);
         }
         finally
         {
-            ResetKnownPorts();
-
+            await ResetKnownPortsAsync();
             await Task.Delay(500);
-
-            if (IsAutoFlashEnabled)
-                _scanTimer.Start();
+            if (IsAutoFlashEnabled) _scanTimer.Start();
         }
     }
+    #endregion
 
-    // ================================================================
-    // ВИБІР ФАЙЛУ
-    // ================================================================
-
-    private void SelectFile(
-        Action<string> setPath,
-        string filter)
+    #region Pipeline Execution
+    private async Task ExecutePipelineAsync(string? portName)
     {
-        var dlg =
-            new OpenFileDialog
-            {
-                Filter = filter
-            };
-
-        if (dlg.ShowDialog() == true)
-        {
-            setPath(
-                dlg.FileName);
-        }
-    }
-
-    // ================================================================
-    // АВТОМАТИЧНЕ СКАНУВАННЯ
-    // ================================================================
-
-    private async void ScanTimer_Tick(
-        object? sender,
-        EventArgs e)
-    {
-        if (IsBusy ||
-            !IsAutoFlashEnabled)
-        {
+        if (!await _pipelineLock.WaitAsync(0))
             return;
-        }
 
-        // ------------------------------------------------------------
-        // 1. Спочатку DFU
-        // ------------------------------------------------------------
+        IsBusy = true;
+        LogEntries.Clear();
 
-        if (!string.IsNullOrWhiteSpace(FirmwarePath) &&
-            File.Exists(FirmwarePath))
+        try
         {
-            bool inDfu = false;
+            bool hasFirmware = !string.IsNullOrWhiteSpace(FirmwarePath) && File.Exists(FirmwarePath);
+            bool hasDump = !string.IsNullOrWhiteSpace(DumpPath) && File.Exists(DumpPath);
 
-            try
+            if (!hasFirmware && !hasDump)
             {
-                inDfu =
-                    await _dfuService
-                        .IsDeviceInDfuModeAsync();
-            }
-            catch
-            {
+                UpdateStatus("Оберіть прошивку або конфігурацію!", Brushes.Orange);
+                return;
             }
 
-            if (inDfu)
+            var statusProgress = new Progress<string>(msg => UpdateStatus(msg, Brushes.Orange));
+            var logProgress = new Progress<LogEntry>(AddLogEntry);
+
+            // 1. Прошивка через DFU
+            if (hasFirmware)
+            {
+                bool isDfuReady = await _dfuService.EnterBootloaderAndWaitAsync(portName, statusProgress, logProgress);
+
+                if (!isDfuReady)
+                    throw new InvalidOperationException("Помилка підготовки STM32 Bootloader.");
+
+                UpdateStatus("Запис прошивки...", Brushes.DodgerBlue);
+                await _dfuService.FlashFirmwareAsync(FirmwarePath, statusProgress, logProgress);
+                AddLog("[DFU] ✓ Прошивку успішно записано.", Brushes.LimeGreen);
+
+                if (hasDump)
+                {
+                    UpdateStatus("Очікування перезавантаження", Brushes.Orange);
+                    AddLog("[PIPELINE] Очікування появи COM-порту після прошивки...", Brushes.LightBlue);
+
+                    portName = await WaitForNewPortAsync(10);
+                    if (string.IsNullOrEmpty(portName))
+                        throw new InvalidOperationException("Плата не підключилася як COM-порт після прошивки!");
+
+                    AddLog($"[PIPELINE] Польотник виявлено на порту: {portName}", Brushes.LimeGreen);
+                    await Task.Delay(1000);
+                }
+            }
+
+            // 2. Заливка налаштувань (Dump)
+            if (hasDump)
+            {
+                if (string.IsNullOrEmpty(portName))
+                {
+                    var ports = await Task.Run(() => _fcWatcherService.GetFlightControllerPorts().ToArray());
+                    portName = ports.FirstOrDefault();
+                }
+
+                if (string.IsNullOrEmpty(portName))
+                    throw new InvalidOperationException("Не знайдено активний COM-порт польотника!");
+
+                await _configService.ApplyDumpAsync(portName, DumpPath, statusProgress, logProgress);
+            }
+
+            if (string.IsNullOrEmpty(portName))
+            {
+                portName = await WaitForNewPortAsync(3);
+            }
+
+            string completionMessage = IsAutoFlashEnabled
+            ? "ГОТОВО! ПІДКЛЮЧІТЬ НАСТУПНИЙ"
+            : "ГОТОВО!";
+            UpdateStatus(completionMessage, Brushes.LimeGreen);
+
+            // Якщо був чистий DFU без повернення в COM — блокуємо по маркеру DFU.
+            _deviceAwaitingDisconnect = IsAutoFlashEnabled
+                        ? (portName ?? "DFU_DEVICE")
+                        : null;
+        }
+        catch (Exception ex)
+        {
+            UpdateStatus($"ЗБІЙ: {ex.Message}", Brushes.IndianRed);
+            AddLog($"[PIPELINE] ✖ {ex.Message}", Brushes.IndianRed);
+            _deviceAwaitingDisconnect = null;
+        }
+        finally
+        {
+            IsBusy = false;
+            _pipelineLock.Release();
+        }
+    }
+    #endregion
+
+    #region Device Polling & Monitoring
+    private async void ScanTimer_Tick(object? sender, EventArgs e)
+    {
+        // Не скануємо, якщо операція вже йде або автозавантаження вимкнене
+        if (_isScanning || IsBusy || !IsAutoFlashEnabled)
+            return;
+
+        // Перевірка наявності хоча б одного вибраного файлу
+        bool hasFirmware = !string.IsNullOrWhiteSpace(FirmwarePath) && File.Exists(FirmwarePath);
+        bool hasDump = !string.IsNullOrWhiteSpace(DumpPath) && File.Exists(DumpPath);
+        if (!hasFirmware && !hasDump)
+            return;
+
+        _isScanning = true;
+
+        try
+        {
+            // -----------------------------------------------------------------
+            // ЕТАП 1: Якщо ми чекаємо, поки користувач висмикне прошитий борт
+            // -----------------------------------------------------------------
+            if (!string.IsNullOrEmpty(_deviceAwaitingDisconnect))
+            {
+                bool isStillPlugged;
+
+                if (_deviceAwaitingDisconnect == "DFU_DEVICE")
+                {
+                    isStillPlugged = await _dfuWatcherService.IsDeviceInDfuModeAsync();
+                }
+                else
+                {
+                    var currentRawPorts = SerialPort.GetPortNames();
+                    isStillPlugged = currentRawPorts.Contains(_deviceAwaitingDisconnect, StringComparer.OrdinalIgnoreCase);
+                }
+
+                if (isStillPlugged)
+                {
+                    // Дрон ще в роз'ємі — чекаємо далі
+                    return;
+                }
+
+                // Дрон нарешті витягнули з роз'єму!
+                _deviceAwaitingDisconnect = null;
+                UpdateStatus("Готовий до підключення нового борту...", Brushes.DodgerBlue);
+                AddLog("[AUTO] Борт від'єднано. Очікування наступного...", Brushes.Gray);
+                return;
+            }
+
+            // -----------------------------------------------------------------
+            // ЕТАП 2: Пошук нового борту для прошивки
+            // -----------------------------------------------------------------
+
+            // 2.1. Перевірка DFU (якщо підключили із затиснутою кнопкою BOOT)
+            if (hasFirmware && await _dfuWatcherService.IsDeviceInDfuModeAsync())
             {
                 _scanTimer.Stop();
-
                 try
                 {
-                    await ExecutePipelineAsync(
-                        portName: null);
+                    AddLog("[AUTO] Виявлено борт у режимі DFU!", Brushes.LightGreen);
+                    await ExecutePipelineAsync(portName: null);
                 }
                 finally
                 {
-                    ResetKnownPorts();
-
-                    await Task.Delay(2000);
-
-                    if (IsAutoFlashEnabled)
-                        _scanTimer.Start();
+                    if (IsAutoFlashEnabled) _scanTimer.Start();
                 }
-
                 return;
             }
+
+            // 2.2. Перевірка COM-портів через WMI
+            // Спочатку робимо швидку перевірку: чи взагалі є якісь COM-порти в системі?
+            var rawPorts = SerialPort.GetPortNames();
+            if (rawPorts.Length == 0)
+                return;
+
+            // Якщо порти є — запитуємо польотники через WMI
+            var fcPorts = await Task.Run(() => _fcWatcherService.GetFlightControllerPorts());
+            if (fcPorts.Count > 0)
+            {
+                string targetPort = fcPorts[0];
+
+                _scanTimer.Stop();
+                try
+                {
+                    AddLog($"[AUTO] Виявлено польотний контролер на {targetPort}!", Brushes.LightGreen);
+                    await ExecutePipelineAsync(targetPort);
+                }
+                finally
+                {
+                    if (IsAutoFlashEnabled) _scanTimer.Start();
+                }
+            }
         }
-
-        // ------------------------------------------------------------
-        // 2. Звичайні COM-порти
-        // ------------------------------------------------------------
-
-        string[] currentRawPorts;
-
-        try
+        finally
         {
-            currentRawPorts =
-                SerialPort.GetPortNames();
+            _isScanning = false;
         }
-        catch
+    }
+    #endregion
+
+    #region Helpers
+    private async Task ProcessCurrentDeviceAsync()
+    {
+        if (IsBusy || !IsAutoFlashEnabled) return;
+
+        bool hasFirmware = !string.IsNullOrWhiteSpace(FirmwarePath) && File.Exists(FirmwarePath);
+        bool hasDump = !string.IsNullOrWhiteSpace(DumpPath) && File.Exists(DumpPath);
+
+        if (!hasFirmware && !hasDump)
         {
+            UpdateStatus("Оберіть прошивку або конфігурацію.", Brushes.Orange);
             return;
         }
 
-        // Якщо це той самий порт, який щойно завершив роботу,
-        // не запускаємо його повторно.
-        if (!string.IsNullOrEmpty(_justFinishedPort))
+        // 1. Перевірка DFU (якщо дрон уже був запущений кнопкою Boot)
+        if (hasFirmware && await _dfuWatcherService.IsDeviceInDfuModeAsync())
         {
-            if (currentRawPorts.Contains(
-                    _justFinishedPort,
-                    StringComparer.OrdinalIgnoreCase))
-            {
-                return;
-            }
-
-            _justFinishedPort = null;
-
-            UpdateStatus(
-                "Готовий до підключення нового борту...",
-                Brushes.DodgerBlue);
-        }
-
-        var currentPorts =
-            DeviceWatcherService
-                .GetFlightControllerPorts()
-                .ToArray();
-
-        var newPorts =
-            currentPorts
-                .Except(
-                    _knownPorts,
-                    StringComparer.OrdinalIgnoreCase)
-                .ToArray();
-
-        _knownPorts =
-            currentPorts;
-
-        _lastSystemPorts =
-            currentRawPorts;
-
-        if (newPorts.Length > 0)
-        {
-            string detectedPort =
-                newPorts[0];
-
             _scanTimer.Stop();
-
             try
             {
-                await ExecutePipelineAsync(
-                    detectedPort);
+                UpdateStatus("Виявлено дрон у режимі STM32 Bootloader...", Brushes.DodgerBlue);
+                AddLog("[AUTO] Підхоплено дрон у DFU режимі.", Brushes.LightBlue);
+
+                await ExecutePipelineAsync(portName: null);
             }
             finally
             {
-                ResetKnownPorts();
-
-                await Task.Delay(1000);
-
-                if (IsAutoFlashEnabled)
-                    _scanTimer.Start();
+                _lastActivityTime = DateTime.UtcNow;
+                if (IsAutoFlashEnabled) _scanTimer.Start();
             }
+            return;
+        }
+
+        // 2. Перевірка звичайного COM-порту польотника
+        var existingPorts = await Task.Run(() => _fcWatcherService.GetFlightControllerPorts().ToArray());
+        if (existingPorts.Length > 0)
+        {
+            string targetPort = existingPorts[0];
+
+            _scanTimer.Stop();
+            try
+            {
+                UpdateStatus($"Виявлено підключений дрон на {targetPort}...", Brushes.DodgerBlue);
+                AddLog($"[AUTO] Підхоплено вже підключений дрон: {targetPort}", Brushes.LightBlue);
+
+                await ExecutePipelineAsync(targetPort);
+            }
+            finally
+            {
+                _lastActivityTime = DateTime.UtcNow;
+                if (IsAutoFlashEnabled) _scanTimer.Start();
+            }
+        }
+        else
+        {
+            UpdateStatus("Очікування підключення дрона...", Brushes.DodgerBlue);
         }
     }
 
-    // ================================================================
-    // ОНОВЛЕННЯ СПИСКУ ПОРТІВ
-    // ================================================================
+    private async Task<string?> WaitForNewPortAsync(int timeoutSeconds, CancellationToken ct = default)
+    {
+        await Task.Delay(500, ct);
+        var sw = Stopwatch.StartNew();
+        var timeoutMs = timeoutSeconds * 1000;
 
-    private void ResetKnownPorts()
+        while (sw.ElapsedMilliseconds < timeoutMs)
+        {
+            ct.ThrowIfCancellationRequested();
+
+            string[] ports;
+            try
+            {
+                ports = await Task.Run(() => _fcWatcherService.GetFlightControllerPorts().ToArray(), ct);
+            }
+            catch
+            {
+                ports = [];
+            }
+
+            if (ports.Length > 0)
+                return ports.Last();
+
+            await Task.Delay(350, ct);
+        }
+
+        return null;
+    }
+
+    private async Task ResetKnownPortsAsync()
     {
         try
         {
-            _knownPorts =
-                DeviceWatcherService
-                    .GetFlightControllerPorts()
-                    .ToArray();
-
-            _lastSystemPorts =
-                SerialPort.GetPortNames();
+            _knownPorts = await Task.Run(() => _fcWatcherService.GetFlightControllerPorts().ToArray());
+            _lastSystemPorts = SerialPort.GetPortNames();
         }
         catch
         {
@@ -695,246 +552,30 @@ public class MainViewModel : BaseViewModel
         }
     }
 
-    // ================================================================
-    // ОСНОВНИЙ PIPELINE
-    // ================================================================
-
-    private async Task ExecutePipelineAsync(
-     string? portName)
+    private void CopyEntireLog()
     {
-        IsBusy = true;
-
-        LogEntries.Clear();
-
-        try
-        {
-            bool hasFirmware =
-                !string.IsNullOrWhiteSpace(FirmwarePath) &&
-                File.Exists(FirmwarePath);
-
-            bool hasDump =
-                !string.IsNullOrWhiteSpace(DumpPath) &&
-                File.Exists(DumpPath);
-
-            if (!hasFirmware && !hasDump)
-            {
-                UpdateStatus(
-                    "Помилка: не обрано файл конфігурації або прошивки!",
-                    Brushes.IndianRed);
-
-                return;
-            }
-
-            var progress =
-                new Progress<string>(
-                    msg =>
-                        UpdateStatus(
-                            msg,
-                            Brushes.Orange));
-
-            // ============================================================
-            // 1. ПРОШИВКА (Тимчасово вимкнено для тесту переходу в DFU)
-            // ============================================================
-
-            if (hasFirmware)
-            {
-                if (!string.IsNullOrEmpty(portName))
-                {
-                    UpdateStatus($"Переведення {portName} у Bootloader...", Brushes.Orange);
-                    AddLog($"[DFU] Переведення {portName} у Bootloader...", Brushes.Orange);
-
-                    await _dfuService.RebootToBootloaderAsync(portName);
-                    AddLog("[DFU] Команду bl відправлено.", Brushes.LightBlue);
-                }
-
-                UpdateStatus("Очікування STM32 BOOTLOADER...", Brushes.Orange);
-                bool inDfu = false;
-
-                for (int i = 0; i < 30; i++)
-                {
-                    await Task.Delay(250);
-                    try
-                    {
-                        inDfu = await _dfuService.IsDeviceInDfuModeAsync();
-                        if (inDfu) break;
-                    }
-                    catch { }
-                }
-
-                foreach (string line in _dfuService.GetConnectedDevicesLog())
-                {
-                    AddLog(line, Brushes.Gray);
-                }
-
-                if (!inDfu)
-                {
-                    throw new InvalidOperationException("STM32 BOOTLOADER не з'явився.");
-                }
-
-                AddLog("[DFU] ✓ STM32 BOOTLOADER знайдено.", Brushes.LimeGreen);
-                UpdateStatus("✔ STM32 BOOTLOADER знайдено (пропуск прошивки)", Brushes.LimeGreen);
-
-                // Завершуємо крок без виклику відсутнього CubeProgrammer
-                return;
-            }
-            // ============================================================
-            // 2. КОНФІГУРАЦІЯ
-            // ============================================================
-
-            if (hasDump)
-            {
-                if (string.IsNullOrEmpty(portName))
-                {
-                    portName =
-                        await WaitForNewPortAsync(
-                            timeoutSeconds: 5);
-
-                    if (string.IsNullOrEmpty(portName))
-                    {
-                        portName =
-                            DeviceWatcherService
-                                .GetFlightControllerPorts()
-                                .FirstOrDefault();
-                    }
-                }
-
-                // Остання спроба — прямий пошук FC.
-                if (string.IsNullOrEmpty(portName))
-                {
-                    portName =
-                        await _serialService
-                            .FindFlightControllerPortAsync();
-                }
-
-                if (string.IsNullOrEmpty(portName))
-                {
-                    throw new InvalidOperationException(
-                        "Не знайдено активний COM-порт " +
-                        "для налаштування!");
-                }
-
-                var logProgress =
-                    new Progress<LogEntry>(
-                        entry =>
-                        {
-                            LogEntries.Add(entry);
-
-                            if (LogEntries.Count > 1500)
-                            {
-                                LogEntries.RemoveAt(0);
-                            }
-                        });
-
-                await _serialService
-                    .ApplyDumpAsync(
-                        portName,
-                        DumpPath,
-                        progress,
-                        logProgress);
-            }
-
-            // ============================================================
-            // 3. ГОТОВО
-            // ============================================================
-
-            UpdateStatus(
-                "ГОТОВО! ПІДКЛЮЧІТЬ НАСТУПНИЙ",
-                Brushes.LimeGreen);
-
-            _justFinishedPort =
-                portName;
-        }
-        catch (Exception ex)
-        {
-            UpdateStatus(
-                $"ЗБІЙ: {ex.Message}",
-                Brushes.IndianRed);
-
-            AddLog(
-                $"[PIPELINE] ✖ {ex.Message}",
-                Brushes.IndianRed);
-
-            _justFinishedPort = null;
-        }
-        finally
-        {
-            IsBusy = false;
-        }
+        string text = string.Join(Environment.NewLine, LogEntries.Select(entry => entry.Text));
+        Clipboard.SetText(text);
     }
 
-    // ================================================================
-    // ОЧІКУВАННЯ COM
-    // ================================================================
-
-    private async Task<string?> WaitForNewPortAsync(
-        int timeoutSeconds)
+    private void SelectFile(Action<string> setPath, string filter)
     {
-        for (
-            int i = 0;
-            i < timeoutSeconds * 2;
-            i++)
-        {
-            var ports =
-                DeviceWatcherService
-                    .GetFlightControllerPorts()
-                    .ToArray();
-
-            if (ports.Length > 0)
-            {
-                return ports.Last();
-            }
-
-            await Task.Delay(500);
-        }
-
-        return null;
+        var dlg = new OpenFileDialog { Filter = filter };
+        if (dlg.ShowDialog() == true) setPath(dlg.FileName);
     }
 
-    // ================================================================
-    // ЛОГ
-    // ================================================================
+    private void AddLog(string message, Brush brush) => AddLogEntry(new LogEntry(message, brush));
 
-    private void AddLog(
-        string message,
-        Brush brush)
+    private void AddLogEntry(LogEntry entry)
     {
-        LogEntries.Add(
-            new LogEntry(
-                message,
-                brush));
-
-        if (LogEntries.Count > 1500)
-        {
-            LogEntries.RemoveAt(0);
-        }
+        LogEntries.Add(entry);
+        if (LogEntries.Count > 1500) LogEntries.RemoveAt(0);
     }
 
-    private void AddDeviceLog(
-    string title)
-    {
-        AddLog(
-            title,
-            Brushes.LightBlue);
-
-        foreach (
-            string line in
-            _dfuService.GetConnectedDevicesLog())
-        {
-            AddLog(
-                line,
-                Brushes.LightGray);
-        }
-    }
-
-    // ================================================================
-    // STATUS
-    // ================================================================
-
-    private void UpdateStatus(
-        string message,
-        Brush brush)
+    private void UpdateStatus(string message, Brush brush)
     {
         StatusText = message;
         StatusBrush = brush;
     }
+    #endregion
 }

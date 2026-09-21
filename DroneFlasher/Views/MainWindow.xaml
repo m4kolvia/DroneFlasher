@@ -8,10 +8,6 @@
         Background="#141416" Foreground="#E1E1E6"
         WindowStartupLocation="CenterScreen">
 
-    <Window.DataContext>
-        <vm:MainViewModel/>
-    </Window.DataContext>
-
     <Window.Resources>
         <DropShadowEffect x:Key="CardShadow" BlurRadius="18" ShadowDepth="3" Opacity="0.35" Color="#000000"/>
 
@@ -104,7 +100,7 @@
                     </Grid.ColumnDefinitions>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="1. Файл прошивки" Foreground="#A0A0B0" FontWeight="SemiBold" FontSize="13"/>
-                        <TextBlock Text=" (HEX / BIN)" Foreground="#70707D" FontSize="12" Margin="4,0,0,0"/>
+                        <TextBlock Text="(.hex)" Foreground="#70707D" FontSize="12" Margin="4,0,0,0"/>
                     </StackPanel>
                     <Button Grid.Column="1" Content="Тест DFU" Command="{Binding TestDfuCommand}"
                             Background="Transparent" Foreground="#60A5FA" FontSize="11" Cursor="Hand" BorderThickness="0"/>
@@ -116,13 +112,13 @@
                     </Grid.ColumnDefinitions>
                     <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding FirmwarePath, UpdateSourceTrigger=PropertyChanged}"/>
                     <Button Grid.Column="1" Content="Огляд..." Style="{StaticResource ModernButton}" 
-                            Command="{Binding SelectFirmwareCommand}" Margin="10,0,0,0" Padding="16,8" IsEnabled="False"/>
+                            Command="{Binding SelectFirmwareCommand}" Margin="10,0,0,0" Padding="16,8"/>
                 </Grid>
             </StackPanel>
 
             <!-- 2. Конфігурація -->
             <StackPanel Grid.Row="1" Margin="0,0,0,16">
-                <TextBlock Text="2. Конфігурація (Dump / Diff)" Foreground="#A0A0B0" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,6"/>
+                <TextBlock Text="2. Конфігурація (Dump / Diff / Backup)" Foreground="#A0A0B0" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,6"/>
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -142,7 +138,7 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <CheckBox IsChecked="{Binding IsAutoFlashEnabled}" VerticalContentAlignment="Center" Cursor="Hand">
-                        <TextBlock Text="Автозапуск USB" FontSize="13" FontWeight="SemiBold" Foreground="#EDEDF2"/>
+                        <TextBlock Text="Автозавантаження" FontSize="13" FontWeight="SemiBold" Foreground="#EDEDF2"/>
                     </CheckBox>
                     <!-- Кнопка автоматично дизейблиться через CanExecute і блюриться тригером у стилі -->
                     <Button Grid.Column="1" Content="Запустити" Style="{StaticResource ModernButton}" 

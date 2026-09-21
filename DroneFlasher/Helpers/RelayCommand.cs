@@ -1,7 +1,6 @@
-﻿using System;
-using System.Windows.Input;
+﻿using System.Windows.Input;
 
-namespace DroneFlasher.ViewModels;
+namespace DroneFlasher.Helpers;
 
 public class RelayCommand : ICommand
 {

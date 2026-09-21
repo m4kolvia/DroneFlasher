@@ -15,30 +15,16 @@ public static class LibUsbBootstrap
 
         _dllPath = ExtractLibUsb();
 
-        // Завантажуємо DLL у процес.
-        // LibUsbDotNet має власний resolver і знайде
-        // вже завантажену native-бібліотеку.
         NativeLibrary.Load(_dllPath);
     }
 
     private static string ExtractLibUsb()
     {
-        string tempDirectory =
-            Path.Combine(
-                Path.GetTempPath(),
-                "DroneFlasher",
-                "libusb");
+        string tempDirectory = Path.Combine(Path.GetTempPath(), "DroneFlasher", "libusb");
+        string dllPath = Path.Combine(tempDirectory, "libusb-1.0.dll");
 
-        Directory.CreateDirectory(
-            tempDirectory);
-
-        string dllPath =
-            Path.Combine(
-                tempDirectory,
-                "libusb-1.0.dll");
-
-        Assembly assembly =
-            typeof(LibUsbBootstrap).Assembly;
+        Directory.CreateDirectory(tempDirectory);
+        Assembly assembly = typeof(LibUsbBootstrap).Assembly;
 
         string? resourceName =
             assembly
@@ -50,26 +36,17 @@ public static class LibUsbBootstrap
 
         if (resourceName == null)
         {
-            throw new FileNotFoundException(
-                "Вбудований libusb-1.0.dll не знайдено.");
+            throw new FileNotFoundException("Вбудований libusb-1.0.dll не знайдено.");
         }
 
-        using Stream? resourceStream =
-            assembly.GetManifestResourceStream(
-                resourceName);
+        using Stream? resourceStream = assembly.GetManifestResourceStream(resourceName);
 
         if (resourceStream == null)
         {
-            throw new FileNotFoundException(
-                "Не вдалося прочитати вбудований libusb-1.0.dll.");
+            throw new FileNotFoundException("Не вдалося прочитати вбудований libusb-1.0.dll.");
         }
 
-        using FileStream fileStream =
-            new FileStream(
-                dllPath,
-                FileMode.Create,
-                FileAccess.Write,
-                FileShare.Read);
+        using FileStream fileStream = new FileStream(dllPath, FileMode.Create, FileAccess.Write, FileShare.Read);
 
         resourceStream.CopyTo(fileStream);
 
