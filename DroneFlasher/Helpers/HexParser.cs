@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using DroneFlasher.Models;
+using System.Globalization;
 using System.IO;
 
 namespace DroneFlasher.Helpers;
@@ -30,7 +31,7 @@ public static class HexParser
             uint address = uint.Parse(line.Substring(3, 4), NumberStyles.HexNumber);
             int recordType = int.Parse(line.Substring(7, 2), NumberStyles.HexNumber);
 
-            if (recordType == 0x00) // Data Record
+            if (recordType == DfuConstants.DFU_DETACH) // Data Record
             {
                 uint fullAddress = upperAddress | address;
                 for (int i = 0; i < byteCount; i++)
@@ -39,11 +40,11 @@ public static class HexParser
                     rawMemory[fullAddress + (uint)i] = b;
                 }
             }
-            else if (recordType == 0x01) // EOF
+            else if (recordType == DfuConstants.DFU_DNLOAD) // EOF
             {
                 break;
             }
-            else if (recordType == 0x04) // Extended Linear Address Record
+            else if (recordType == DfuConstants.DFU_CLRSTATUS) // Extended Linear Address Record
             {
                 upperAddress = uint.Parse(line.Substring(9, 4), NumberStyles.HexNumber) << 16;
             }

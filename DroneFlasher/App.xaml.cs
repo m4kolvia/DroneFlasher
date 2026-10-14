@@ -1,10 +1,13 @@
-﻿using DroneFlasher.Options;
+﻿using System.IO;
+using System.Windows;
+using System.Windows.Threading;
+using DroneFlasher.Helpers;
+using DroneFlasher.Models;
 using DroneFlasher.Services;
 using DroneFlasher.ViewModels;
 using DroneFlasher.Views;
 using LibUsbDotNet.LibUsb;
 using Microsoft.Extensions.DependencyInjection;
-using System.Windows;
 
 namespace DroneFlasher;
 
@@ -14,13 +17,17 @@ public partial class App : Application
 
     protected override void OnStartup(StartupEventArgs e)
     {
+        this.DispatcherUnhandledException += App_DispatcherUnhandledException;
+        AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+
         LibUsbBootstrap.Initialize();
 
         base.OnStartup(e);
 
         var services = new ServiceCollection();
 
-        services.AddSingleton<UsbContext>(); services.AddSingleton<FlightControllerOptions>();
+        services.AddSingleton<UsbContext>();
+        services.AddSingleton<FlightControllerUsbSignatures>();
 
         services.AddSingleton<ConfigurationService>();
         services.AddSingleton<DfuService>();
@@ -34,17 +41,42 @@ public partial class App : Application
 
         var mainWindow = ServiceProvider.GetRequiredService<MainWindow>();
         mainWindow.Show();
-        mainWindow.Show();
+    }
 
-        mainWindow.Dispatcher.BeginInvoke(
-            new Action(() =>
-            {
-                if (mainWindow.DataContext is MainViewModel vm)
-                {
-                    vm.StartMonitoring();
-                }
-            }),
-            System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+    private void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+    {
+        LogCrash(e.Exception, "UI Thread");
+        e.Handled = true; 
+    }
 
+    private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+    {
+        LogCrash(e.ExceptionObject as Exception, "AppDomain");
+    }
+
+    private void LogCrash(Exception? ex, string source)
+    {
+        if (ex == null) return;
+
+        string logFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "crash_log.txt");
+
+        string errorText = $"[{DateTime.Now}] КРИТИЧНИЙ ЗБІЙ ({source}):\n" +
+                           $"Помилка: {ex.Message}\n\n" +
+                           $"Стек викликів:\n{ex.StackTrace}\n";
+
+        if (ex.InnerException != null)
+        {
+            errorText += $"\nВнутрішня помилка:\n{ex.InnerException.Message}\n{ex.InnerException.StackTrace}\n";
+        }
+
+        try
+        {
+            File.AppendAllText(logFile, errorText + new string('-', 40) + "\n");
+
+            MessageBox.Show(errorText, "Фатальна помилка програми", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        catch
+        {
+        }
     }
 }

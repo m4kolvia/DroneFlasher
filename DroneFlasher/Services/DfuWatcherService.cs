@@ -1,14 +1,12 @@
 ﻿using System.IO.Ports;
 using System.Management;
+using DroneFlasher.Models;
 using LibUsbDotNet.LibUsb;
 
 namespace DroneFlasher.Services;
 
 public class DfuWatcherService : IDisposable
 {
-    private const ushort StmDfuVid = 0x0483;
-    private const ushort StmDfuPid = 0xDF11;
-
     private readonly UsbContext _usbContext = new();
 
     public async Task<bool> IsDeviceInDfuModeAsync()
@@ -19,9 +17,7 @@ public class DfuWatcherService : IDisposable
             {
                 using var deviceList = _usbContext.List();
 
-                return deviceList.Any(d =>
-                    d.VendorId == StmDfuVid &&
-                    d.ProductId == StmDfuPid);
+                return deviceList.Any(d => d.VendorId == DfuConstants.StmDfuVid && d.ProductId == DfuConstants.StmDfuPid);
             }
             catch
             {

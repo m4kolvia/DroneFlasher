@@ -192,6 +192,6 @@ public class ConfigurationService
     {
         if (total <= 0) return;
         int percent = current * 100 / total;
-        statusProgress.Report($"{percent}% ({current}/{total}");
+        statusProgress.Report($"{percent}% ({current}/{total})");
     }
 }

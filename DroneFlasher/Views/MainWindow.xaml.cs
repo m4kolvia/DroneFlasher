@@ -1,11 +1,9 @@
 ﻿using DroneFlasher.ViewModels;
 using System.Windows;
+using System.Windows.Input;
 
 namespace DroneFlasher.Views
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         public MainWindow(MainViewModel viewModel)
@@ -13,5 +11,35 @@ namespace DroneFlasher.Views
             InitializeComponent();
             DataContext = viewModel;
         }
+        private void TitleBar_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
+                DragMove();
+        }
+
+        private void MinimizeButton_Click(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
+
+        private void MaximizeButton_Click(object sender, RoutedEventArgs e)
+        {
+            WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+        }
+
+        private void AutoFlashCard_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (DataContext is MainViewModel vm)
+            {
+                vm.IsAutoFlashEnabled = true;
+                e.Handled = true;
+            }
+        }
+        private void ManualFlashCard_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (DataContext is MainViewModel vm)
+            {
+                vm.IsAutoFlashEnabled = false;
+                e.Handled = true;
+            }
+        }
+        private void CloseButton_Click(object sender, RoutedEventArgs e) => Close();
     }
 }

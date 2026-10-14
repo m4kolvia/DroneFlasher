@@ -4,14 +4,90 @@
         xmlns:vm="clr-namespace:DroneFlasher.ViewModels"
         xmlns:helpers="clr-namespace:DroneFlasher.Helpers"
         Title="Рука допомоги" 
-        Height="540" Width="980"
+        Height="580" Width="980"
         Background="#141416" Foreground="#E1E1E6"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        AllowsTransparency="True">
 
     <Window.Resources>
         <DropShadowEffect x:Key="CardShadow" BlurRadius="18" ShadowDepth="3" Opacity="0.35" Color="#000000"/>
 
-        <!-- Стиль полів вводу -->
+        <Style x:Key="LinkButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="FlashStartButton" TargetType="Button">
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="Background" Value="#2563EB"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="10,11"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#4F8DFF"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="7"
+                                Padding="{TemplateBinding Padding}">
+
+                            <Border.Effect>
+                                <DropShadowEffect x:Name="ButtonGlow"
+                                                  Color="#2563EB"
+                                                  BlurRadius="10"
+                                                  ShadowDepth="0"
+                                                  Opacity="0.22"/>
+                            </Border.Effect>
+
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#3B82F6"/>
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="#93C5FD"/>
+                            </Trigger>
+
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#1D4ED8"/>
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="#2563EB"/>
+                            </Trigger>
+
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#252832"/>
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="#343744"/>
+                                <Setter Property="Foreground" Value="#777D8B"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="ModernTextBox" TargetType="TextBox">
             <Setter Property="Background" Value="#222328"/>
             <Setter Property="Foreground" Value="#F0F0F5"/>
@@ -34,7 +110,6 @@
             </Setter>
         </Style>
 
-        <!-- Стиль кнопок із вбудованим блюром та деактивацією під час IsBusy -->
         <Style x:Key="ModernButton" TargetType="Button">
             <Setter Property="Background" Value="#2B2D35"/>
             <Setter Property="Foreground" Value="#E6E6EB"/>
@@ -46,9 +121,9 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="border" 
-                        Background="{TemplateBinding Background}" 
-                        CornerRadius="6" 
-                        Padding="{TemplateBinding Padding}">
+                                Background="{TemplateBinding Background}" 
+                                CornerRadius="6" 
+                                Padding="{TemplateBinding Padding}">
                             <ContentPresenter x:Name="content" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -59,7 +134,6 @@
                                 <Setter TargetName="border" Property="Background" Value="#1E1F24"/>
                             </Trigger>
 
-                            <!-- Стан, коли йде завантаження (сірий вигляд) -->
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter TargetName="border" Property="Background" Value="#2A2B30"/>
                                 <Setter Property="Foreground" Value="#656770"/>
@@ -70,148 +144,346 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <Style x:Key="ManualStartButton" TargetType="Button" BasedOn="{StaticResource ModernButton}">
+            <Setter Property="Padding" Value="12,9"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#D4D4D8"/>
+            <Setter Property="Background" Value="#303139"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#41424C"/>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsAutoFlashEnabled}" Value="False">
+                    <Setter Property="Background" Value="#2563EB"/>
+                    <Setter Property="Foreground" Value="#FFFFFF"/>
+                    <Setter Property="BorderBrush" Value="#3B82F6"/>
+                    <Setter Property="IsEnabled" Value="True"/>
+                </DataTrigger>
+
+                <DataTrigger Binding="{Binding IsAutoFlashEnabled}" Value="True">
+                    <Setter Property="Background" Value="#292A30"/>
+                    <Setter Property="Foreground" Value="#92939D"/>
+                    <Setter Property="BorderBrush" Value="#383941"/>
+                    <Setter Property="IsEnabled" Value="False"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="WindowControlButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#A0A0B0"/>
+            <Setter Property="Width" Value="40"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bg" Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bg" Property="Background" Value="#2B2D35"/>
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
 
-    <Grid Margin="20">
-        <Grid.ColumnDefinitions>
-            <!-- Ліва частина: Панель налаштувань -->
-            <ColumnDefinition Width="460"/>
-            <!-- Розділювач -->
-            <ColumnDefinition Width="16"/>
-            <!-- Права частина: Консоль польотника -->
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-        <!-- ЛІВА КОЛОНКА -->
-        <Grid Grid.Column="0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
+        <!-- TITLEBAR -->
+        <Grid Grid.Row="0" Background="#0A0A0B" MouseDown="TitleBar_MouseDown">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
 
-            <!-- 1. Прошивка -->
-            <StackPanel Grid.Row="0" Margin="0,0,0,14">
-                <Grid Margin="0,0,0,6">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="1. Файл прошивки" Foreground="#A0A0B0" FontWeight="SemiBold" FontSize="13"/>
-                        <TextBlock Text="(.hex)" Foreground="#70707D" FontSize="12" Margin="4,0,0,0"/>
-                    </StackPanel>
-                    <Button Grid.Column="1" Content="Тест DFU" Command="{Binding TestDfuCommand}"
-                            Background="Transparent" Foreground="#60A5FA" FontSize="11" Cursor="Hand" BorderThickness="0"/>
-                </Grid>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding FirmwarePath, UpdateSourceTrigger=PropertyChanged}"/>
-                    <Button Grid.Column="1" Content="Огляд..." Style="{StaticResource ModernButton}" 
-                            Command="{Binding SelectFirmwareCommand}" Margin="10,0,0,0" Padding="16,8"/>
-                </Grid>
+            <StackPanel Grid.Column="0"
+                        Orientation="Horizontal"
+                        VerticalAlignment="Center"
+                        Margin="22,0,0,0">
+                <Image Source="/app.ico"
+                       Width="46" Height="46"
+                       Stretch="Uniform"
+                       VerticalAlignment="Center"
+                       Margin="0,0,12,0"/>
+                <TextBlock Text="РУКА ДОПОМОГИ"
+                           Foreground="#E1E1E6"
+                           FontSize="13"
+                           FontWeight="Bold"
+                           VerticalAlignment="Center"/>
             </StackPanel>
 
-            <!-- 2. Конфігурація -->
-            <StackPanel Grid.Row="1" Margin="0,0,0,16">
-                <TextBlock Text="2. Конфігурація (Dump / Diff / Backup)" Foreground="#A0A0B0" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,6"/>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding DumpPath, UpdateSourceTrigger=PropertyChanged}"/>
-                    <Button Grid.Column="1" Content="Огляд..." Style="{StaticResource ModernButton}" 
-                            Command="{Binding SelectDumpCommand}" Margin="10,0,0,0" Padding="16,8"/>
-                </Grid>
+            <StackPanel Grid.Column="1"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        Margin="0,0,12,0">
+                <Button Click="MinimizeButton_Click"
+                        Style="{StaticResource WindowControlButtonStyle}"
+                        ToolTip="Згорнути">
+                    <TextBlock Text="&#xE921;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="10"/>
+                </Button>
+                <Button Click="MaximizeButton_Click"
+                        Style="{StaticResource WindowControlButtonStyle}"
+                        ToolTip="Розгорнути">
+                    <TextBlock Text="&#xE922;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="10"/>
+                </Button>
+                <Button Click="CloseButton_Click"
+                        Style="{StaticResource WindowControlButtonStyle}"
+                        ToolTip="Закрити">
+                    <TextBlock Text="&#xE8BB;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="10"/>
+                </Button>
             </StackPanel>
-
-            <!-- 3. Автозапуск та ручний пуск -->
-            <Border Grid.Row="2" Background="#1B1C21" CornerRadius="8" Padding="12,10" Margin="0,0,0,16" BorderBrush="#262830" BorderThickness="1">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <CheckBox IsChecked="{Binding IsAutoFlashEnabled}" VerticalContentAlignment="Center" Cursor="Hand">
-                        <TextBlock Text="Автозавантаження" FontSize="13" FontWeight="SemiBold" Foreground="#EDEDF2"/>
-                    </CheckBox>
-                    <!-- Кнопка автоматично дизейблиться через CanExecute і блюриться тригером у стилі -->
-                    <Button Grid.Column="1" Content="Запустити" Style="{StaticResource ModernButton}" 
-                            Command="{Binding ManualFlashCommand}" Background="#2563EB" Foreground="#FFFFFF" Padding="16,6" FontSize="12"/>
-                </Grid>
-            </Border>
-
-            <!-- 4. Статус картка -->
-            <Border Grid.Row="3" Background="#1A1B22" CornerRadius="8" BorderThickness="1.5" 
-                    BorderBrush="{Binding StatusBrush}" Effect="{StaticResource CardShadow}">
-                <Grid>
-                    <Border Background="{Binding StatusBrush}" Opacity="0.07" CornerRadius="7"/>
-                    <TextBlock Text="{Binding StatusText}" Foreground="{Binding StatusBrush}" FontSize="15" 
-                               FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" 
-                               TextWrapping="Wrap" TextAlignment="Center" Margin="16"/>
-                </Grid>
-            </Border>
         </Grid>
 
-        <!-- ПРАВА КОЛОНКА: Консоль CLI -->
-        <Border Grid.Column="2" Background="#0C0D0E" CornerRadius="8" BorderBrush="#23242B" BorderThickness="1">
-            <Grid Margin="12">
+        <!-- MAIN CONTENT -->
+        <Grid Grid.Row="1" Margin="20,10,20,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="460"/>
+                <ColumnDefinition Width="16"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- LEFT COLUMN -->
+            <Grid Grid.Column="0">
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <!-- Шапка консолі -->
-                <Grid Grid.Row="0" Margin="0,0,0,8">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="CLI Консоль" FontWeight="Bold" FontSize="12" Foreground="#8B8D98"/>
-                    </StackPanel>
-                    <StackPanel Grid.Column="1" Orientation="Horizontal">
-                        <Button Content="Копіювати"
-            Command="{Binding CopyLogCommand}"
-            Background="Transparent"
-            Foreground="#60A5FA"
-            FontSize="11"
-            Cursor="Hand"
-            BorderThickness="0"
-            Margin="0,0,12,0"/>
+                <!-- 1. Firmware -->
+                <Border Grid.Row="0" Background="#1A1B22" CornerRadius="8" Padding="16,14" Margin="0,0,0,12" BorderBrush="#23242B" BorderThickness="1">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,10">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="1. Файл прошивки" Foreground="#EDEDF2" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"/>
+                                <TextBlock Text="(.hex)" Foreground="#70707D" FontSize="12" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Grid>
 
-                        <Button Content="Очистити"
-            Command="{Binding ClearLogCommand}"
-            Background="Transparent"
-            Foreground="#71717A"
-            FontSize="11"
-            Cursor="Hand"
-            BorderThickness="0"/>
-                    </StackPanel>
-                </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
 
-                <!-- Тіло консолі з автоскролом -->
-                <ListBox x:Name="ConsoleListBox"
-                         Grid.Row="1" 
-                         ItemsSource="{Binding LogEntries}"
-                         helpers:ListBoxBehavior.AutoScroll="True"
-                         Background="Transparent" 
-                         BorderThickness="0"
-                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                         ScrollViewer.VerticalScrollBarVisibility="Auto">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Text}" Foreground="{Binding Color}" 
-                                       FontFamily="Consolas" FontSize="11" Margin="0,1" TextWrapping="Wrap"/>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
+                            <TextBox Grid.Column="0" 
+                                     Style="{StaticResource ModernTextBox}" 
+                                     Text="{Binding FirmwarePath, UpdateSourceTrigger=PropertyChanged}"/>
+
+                            <Button Grid.Column="1" Style="{StaticResource ModernButton}" 
+                                    Background="#352626" Foreground="#E55A5A"
+                                    Command="{Binding ClearFirmwareCommand}" Margin="8,0,0,0" Padding="12,8" ToolTip="Очистити прошивку">
+                                <TextBlock Text="&#xE711;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="11" FontWeight="Bold" VerticalAlignment="Center"/>
+                            </Button>
+
+                            <Button Grid.Column="2" Style="{StaticResource ModernButton}" 
+                                    Command="{Binding SelectFirmwareCommand}" Margin="6,0,0,0" Padding="12,0">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE838;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="13" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Огляд" FontSize="12" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- 2. Configuration -->
+                <Border Grid.Row="1" Background="#1A1B22" CornerRadius="8" Padding="16,14" Margin="0,0,0,16" BorderBrush="#23242B" BorderThickness="1">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                            <TextBlock Text="2. Конфігурація (Dump / Diff / Backup)" Foreground="#EDEDF2" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBox Grid.Column="0" 
+                                     Style="{StaticResource ModernTextBox}" 
+                                     Text="{Binding DumpPath, UpdateSourceTrigger=PropertyChanged}"/>
+
+                            <Button Grid.Column="1" Style="{StaticResource ModernButton}" 
+                                    Background="#352626" Foreground="#E55A5A"
+                                    Command="{Binding ClearDumpCommand}" Margin="8,0,0,0" Padding="12,8" ToolTip="Очистити конфігурацію">
+                                <TextBlock Text="&#xE711;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="11" FontWeight="Bold" VerticalAlignment="Center"/>
+                            </Button>
+
+                            <Button Grid.Column="2" Style="{StaticResource ModernButton}" 
+                                    Command="{Binding SelectDumpCommand}" Margin="6,0,0,0" Padding="12,0">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE838;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="13" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Огляд" FontSize="12" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- 3. RUN MODE -->
+                <Border Grid.Row="2" Background="#15161A" BorderBrush="#292A30" BorderThickness="1" CornerRadius="12" Padding="14" Margin="0,0,0,12">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,14">
+                            <TextBlock Text="РЕЖИМ ЗАПУСКУ" FontSize="11" FontWeight="Bold" Foreground="#85858F" VerticalAlignment="Center"/>
+                        </Grid>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- MANUAL -->
+                            <Border Grid.Column="0" CornerRadius="10" Padding="12" Margin="0,0,6,0" BorderThickness="1" Cursor="Hand" MouseLeftButtonUp="ManualFlashCard_MouseLeftButtonUp">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Background" Value="#1B1C22"/>
+                                        <Setter Property="BorderBrush" Value="#30313A"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsAutoFlashEnabled}" Value="False">
+                                                <Setter Property="Background" Value="#172B4D"/>
+                                                <Setter Property="BorderBrush" Value="#3B82F6"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="2,0,6,0">
+                                        <TextBlock Text="Ручний запуск" FontSize="12" FontWeight="SemiBold" Foreground="#F4F4F5"/>
+                                    </StackPanel>
+
+                                    <Button Grid.Column="1"
+                                            Command="{Binding ManualFlashCommand}"
+                                            Style="{StaticResource ManualStartButton}"
+                                            VerticalAlignment="Center"
+                                            Padding="11,9"
+                                            ToolTip="Запустити ручне завантаження">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <TextBlock Text="&#xE768;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="11" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="Запустити" FontSize="11" FontWeight="Bold" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Button>
+                                </Grid>
+                            </Border>
+
+                            <!-- AUTO -->
+                            <Border Grid.Column="1" CornerRadius="10" Padding="12" Margin="6,0,0,0" BorderThickness="1" Cursor="Hand" MouseLeftButtonUp="AutoFlashCard_MouseLeftButtonUp">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Background" Value="#1B1C22"/>
+                                        <Setter Property="BorderBrush" Value="#30313A"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsAutoFlashEnabled}" Value="True">
+                                                <Setter Property="Background" Value="#172B4D"/>
+                                                <Setter Property="BorderBrush" Value="#3B82F6"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+
+                                <Grid VerticalAlignment="Center">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Border Width="32" Height="32" CornerRadius="8" Background="#252C3B" VerticalAlignment="Center">
+                                        <TextBlock Text="↻" FontSize="18" Foreground="#60A5FA" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="9,0,0,0">
+                                        <TextBlock Text="Автозавантаження" FontSize="12" FontWeight="SemiBold" Foreground="#F4F4F5"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- 4. STATUS -->
+                <Border Grid.Row="3" Background="#1A1B22" CornerRadius="8" BorderThickness="1.5" BorderBrush="{Binding StatusBrush}" Effect="{StaticResource CardShadow}">
+                    <Grid>
+                        <Border Background="{Binding StatusBrush}" Opacity="0.08" CornerRadius="7"/>
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="16">
+                            <TextBlock Text="{Binding StatusText}" Foreground="{Binding StatusBrush}" FontSize="16" FontWeight="Bold" TextWrapping="Wrap" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
             </Grid>
-        </Border>
+
+            <!-- RIGHT COLUMN: CLI Console -->
+            <Border Grid.Column="2" Background="#0C0D0E" CornerRadius="8" BorderBrush="#23242B" BorderThickness="1">
+                <Grid Margin="12">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0" Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="CLI Консоль" FontWeight="Bold" FontSize="12" Foreground="#8B8D98"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <Button Content="Копіювати"
+                                    Command="{Binding CopyLogCommand}"
+                                    Style="{StaticResource LinkButtonStyle}"
+                                    Foreground="#60A5FA"
+                                    FontSize="11"
+                                    Margin="0,0,12,0"/>
+
+                            <Button Content="Очистити"
+                                    Command="{Binding ClearLogCommand}"
+                                    Style="{StaticResource LinkButtonStyle}"
+                                    Foreground="#71717A"
+                                    FontSize="11"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <ListBox x:Name="ConsoleListBox"
+                             Grid.Row="1" 
+                             ItemsSource="{Binding LogEntries}"
+                             helpers:ListBoxBehavior.AutoScroll="True"
+                             Background="Transparent" 
+                             BorderThickness="0"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Text}" Foreground="{Binding Color}" 
+                                           FontFamily="Consolas" FontSize="11" Margin="0,1" TextWrapping="Wrap"/>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </Border>
+        </Grid>
     </Grid>
 </Window>

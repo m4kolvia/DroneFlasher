@@ -1,5 +1,5 @@
-﻿using System.Management;
-using DroneFlasher.Options;
+﻿using DroneFlasher.Models;
+using System.Management;
 
 namespace DroneFlasher.Services;
 
@@ -7,7 +7,7 @@ public class FlightControllerWatcherService
 {
     private readonly string[] _signatures;
 
-    public FlightControllerWatcherService(FlightControllerOptions options)
+    public FlightControllerWatcherService(FlightControllerUsbSignatures options)
     {
         _signatures = options.AllowedSignatures;
     }
@@ -27,8 +27,7 @@ public class FlightControllerWatcherService
                 string pnpId = device["PNPDeviceID"]?.ToString() ?? string.Empty;
                 string caption = device["Caption"]?.ToString() ?? string.Empty;
 
-                bool isDrone = _signatures.Any(sig =>
-                    pnpId.Contains(sig, StringComparison.OrdinalIgnoreCase));
+                bool isDrone = _signatures.Any(sig => pnpId.Contains(sig, StringComparison.OrdinalIgnoreCase));
 
                 if (isDrone)
                 {
