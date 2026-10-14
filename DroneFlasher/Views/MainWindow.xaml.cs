@@ -1,5 +1,7 @@
-﻿using DroneFlasher.ViewModels;
+﻿using DroneFlasher.Helpers;
+using DroneFlasher.ViewModels;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace DroneFlasher.Views
@@ -9,8 +11,12 @@ namespace DroneFlasher.Views
         public MainWindow(MainViewModel viewModel)
         {
             InitializeComponent();
+
             DataContext = viewModel;
+
+            ThemeManager.ApplyTheme(this, ThemeManager.CurrentThemeKey);
         }
+
         private void TitleBar_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton == MouseButton.Left)
@@ -40,6 +46,15 @@ namespace DroneFlasher.Views
                 e.Handled = true;
             }
         }
+
+        private void SettingsButton_Click(
+            object sender,
+            RoutedEventArgs e)
+        {
+            var settingsWindow = new ThemeSettingsWindow(this);
+            settingsWindow.ShowDialog();
+        }
+
         private void CloseButton_Click(object sender, RoutedEventArgs e) => Close();
     }
 }

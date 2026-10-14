@@ -1,0 +1,44 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Color x:Key="TitleBarBackgroundColor">#120D1B</Color>
+    <Color x:Key="ConsoleBackgroundColor">#100C18</Color>
+    <Color x:Key="WindowBackgroundColor">#191321</Color>
+    <Color x:Key="CardSecondaryBackgroundColor">#20172B</Color>
+    <Color x:Key="SelectedCardBackgroundColor">#392456</Color>
+    <Color x:Key="CardBackgroundColor">#241B30</Color>
+    <Color x:Key="ModeCardBackgroundColor">#2A2037</Color>
+    <Color x:Key="AccentPressedColor">#7E22CE</Color>
+    <Color x:Key="ButtonPressedColor">#33263F</Color>
+    <Color x:Key="InputBackgroundColor">#30243B</Color>
+    <Color x:Key="BorderColor">#382B45</Color>
+    <Color x:Key="AutoIconBackgroundColor">#352448</Color>
+    <Color x:Key="AccentColor">#9333EA</Color>
+    <Color x:Key="InactiveButtonBackgroundColor">#393041</Color>
+    <Color x:Key="ButtonBackgroundColor">#403448</Color>
+    <Color x:Key="ManualButtonBackgroundColor">#493A52</Color>
+    <Color x:Key="SecondaryBorderColor">#51405D</Color>
+    <Color x:Key="InputBorderColor">#534060</Color>
+    <Color x:Key="InactiveButtonBorderColor">#584862</Color>
+    <Color x:Key="ButtonHoverColor">#51405F</Color>
+    <Color x:Key="AccentHoverColor">#A855F7</Color>
+    <Color x:Key="ManualButtonBorderColor">#665071</Color>
+    <Color x:Key="AccentBorderColor">#C084FC</Color>
+    <Color x:Key="AccentLightColor">#D8B4FE</Color>
+    <Color x:Key="MutedTextColor">#81738D</Color>
+    <Color x:Key="MutedActionTextColor">#8C7B98</Color>
+    <Color x:Key="SectionLabelColor">#A193AE</Color>
+    <Color x:Key="SecondaryTextColor">#AA9BB7</Color>
+    <Color x:Key="InactiveButtonTextColor">#B0A2BB</Color>
+    <Color x:Key="AccentHoverBorderColor">#E9D5FF</Color>
+    <Color x:Key="WindowControlTextColor">#B6A7C2</Color>
+    <Color x:Key="ManualButtonTextColor">#E0D5E9</Color>
+    <Color x:Key="PrimaryTextColor">#EAE2F0</Color>
+    <Color x:Key="ButtonTextColor">#F0E8F7</Color>
+    <Color x:Key="HeadingTextColor">#FAF5FF</Color>
+    <Color x:Key="InputTextColor">#FAF5FF</Color>
+    <Color x:Key="ModeTextColor">#FAF5FF</Color>
+    <Color x:Key="WhiteTextColor">#FFFFFF</Color>
+
+</ResourceDictionary>

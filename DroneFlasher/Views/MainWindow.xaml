@@ -3,206 +3,309 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:DroneFlasher.ViewModels"
         xmlns:helpers="clr-namespace:DroneFlasher.Helpers"
-        Title="Рука допомоги" 
-        Height="580" Width="980"
-        Background="#141416" Foreground="#E1E1E6"
+        Title="Рука допомоги"
+        Height="580"
+        Width="980"
+        Background="{DynamicResource WindowBackgroundBrush}"
+        Foreground="{DynamicResource PrimaryTextBrush}"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
-        AllowsTransparency="True">
+        AllowsTransparency="False"
+        ResizeMode="CanResize">
 
     <Window.Resources>
-        <DropShadowEffect x:Key="CardShadow" BlurRadius="18" ShadowDepth="3" Opacity="0.35" Color="#000000"/>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Themes/BasePalette.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
 
-        <Style x:Key="LinkButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Foreground" Value="#FFFFFF"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+            <SolidColorBrush x:Key="ShadowBrush" Color="{DynamicResource ShadowColor}"/>
+            <SolidColorBrush x:Key="TitleBarBackgroundBrush" Color="{DynamicResource TitleBarBackgroundColor}"/>
+            <SolidColorBrush x:Key="ConsoleBackgroundBrush" Color="{DynamicResource ConsoleBackgroundColor}"/>
+            <SolidColorBrush x:Key="WindowBackgroundBrush" Color="{DynamicResource WindowBackgroundColor}"/>
+            <SolidColorBrush x:Key="CardSecondaryBackgroundBrush" Color="{DynamicResource CardSecondaryBackgroundColor}"/>
+            <SolidColorBrush x:Key="SelectedCardBackgroundBrush" Color="{DynamicResource SelectedCardBackgroundColor}"/>
+            <SolidColorBrush x:Key="CardBackgroundBrush" Color="{DynamicResource CardBackgroundColor}"/>
+            <SolidColorBrush x:Key="ModeCardBackgroundBrush" Color="{DynamicResource ModeCardBackgroundColor}"/>
+            <SolidColorBrush x:Key="AccentPressedBrush" Color="{DynamicResource AccentPressedColor}"/>
+            <SolidColorBrush x:Key="ButtonPressedBrush" Color="{DynamicResource ButtonPressedColor}"/>
+            <SolidColorBrush x:Key="InputBackgroundBrush" Color="{DynamicResource InputBackgroundColor}"/>
+            <SolidColorBrush x:Key="BorderBrush" Color="{DynamicResource BorderColor}"/>
+            <SolidColorBrush x:Key="DisabledButtonBackgroundBrush" Color="{DynamicResource DisabledButtonBackgroundColor}"/>
+            <SolidColorBrush x:Key="AutoIconBackgroundBrush" Color="{DynamicResource AutoIconBackgroundColor}"/>
+            <SolidColorBrush x:Key="AccentBrush" Color="{DynamicResource AccentColor}"/>
+            <SolidColorBrush x:Key="InactiveButtonBackgroundBrush" Color="{DynamicResource InactiveButtonBackgroundColor}"/>
+            <SolidColorBrush x:Key="DisabledButtonHoverBackgroundBrush" Color="{DynamicResource DisabledButtonHoverBackgroundColor}"/>
+            <SolidColorBrush x:Key="ButtonBackgroundBrush" Color="{DynamicResource ButtonBackgroundColor}"/>
+            <SolidColorBrush x:Key="ManualButtonBackgroundBrush" Color="{DynamicResource ManualButtonBackgroundColor}"/>
+            <SolidColorBrush x:Key="SecondaryBorderBrush" Color="{DynamicResource SecondaryBorderColor}"/>
+            <SolidColorBrush x:Key="InputBorderBrush" Color="{DynamicResource InputBorderColor}"/>
+            <SolidColorBrush x:Key="DisabledButtonBorderBrush" Color="{DynamicResource DisabledButtonBorderColor}"/>
+            <SolidColorBrush x:Key="DangerBackgroundBrush" Color="{DynamicResource DangerBackgroundColor}"/>
+            <SolidColorBrush x:Key="InactiveButtonBorderBrush" Color="{DynamicResource InactiveButtonBorderColor}"/>
+            <SolidColorBrush x:Key="ButtonHoverBrush" Color="{DynamicResource ButtonHoverColor}"/>
+            <SolidColorBrush x:Key="AccentHoverBrush" Color="{DynamicResource AccentHoverColor}"/>
+            <SolidColorBrush x:Key="ManualButtonBorderBrush" Color="{DynamicResource ManualButtonBorderColor}"/>
+            <SolidColorBrush x:Key="AccentBorderBrush" Color="{DynamicResource AccentBorderColor}"/>
+            <SolidColorBrush x:Key="AccentLightBrush" Color="{DynamicResource AccentLightColor}"/>
+            <SolidColorBrush x:Key="DisabledTextBrush" Color="{DynamicResource DisabledTextColor}"/>
+            <SolidColorBrush x:Key="MutedTextBrush" Color="{DynamicResource MutedTextColor}"/>
+            <SolidColorBrush x:Key="MutedActionTextBrush" Color="{DynamicResource MutedActionTextColor}"/>
+            <SolidColorBrush x:Key="DisabledButtonTextBrush" Color="{DynamicResource DisabledButtonTextColor}"/>
+            <SolidColorBrush x:Key="SectionLabelBrush" Color="{DynamicResource SectionLabelColor}"/>
+            <SolidColorBrush x:Key="SecondaryTextBrush" Color="{DynamicResource SecondaryTextColor}"/>
+            <SolidColorBrush x:Key="InactiveButtonTextBrush" Color="{DynamicResource InactiveButtonTextColor}"/>
+            <SolidColorBrush x:Key="AccentHoverBorderBrush" Color="{DynamicResource AccentHoverBorderColor}"/>
+            <SolidColorBrush x:Key="WindowControlTextBrush" Color="{DynamicResource WindowControlTextColor}"/>
+            <SolidColorBrush x:Key="ManualButtonTextBrush" Color="{DynamicResource ManualButtonTextColor}"/>
+            <SolidColorBrush x:Key="PrimaryTextBrush" Color="{DynamicResource PrimaryTextColor}"/>
+            <SolidColorBrush x:Key="DangerBrush" Color="{DynamicResource DangerColor}"/>
+            <SolidColorBrush x:Key="ButtonTextBrush" Color="{DynamicResource ButtonTextColor}"/>
+            <SolidColorBrush x:Key="HeadingTextBrush" Color="{DynamicResource HeadingTextColor}"/>
+            <SolidColorBrush x:Key="InputTextBrush" Color="{DynamicResource InputTextColor}"/>
+            <SolidColorBrush x:Key="ModeTextBrush" Color="{DynamicResource ModeTextColor}"/>
+            <SolidColorBrush x:Key="WhiteTextBrush" Color="{DynamicResource WhiteTextColor}"/>
 
-        <Style x:Key="FlashStartButton" TargetType="Button">
-            <Setter Property="Foreground" Value="#FFFFFF"/>
-            <Setter Property="Background" Value="#2563EB"/>
-            <Setter Property="FontSize" Value="12"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Padding" Value="10,11"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="BorderBrush" Value="#4F8DFF"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <DropShadowEffect x:Key="CardShadow" BlurRadius="18" ShadowDepth="3" Opacity="0.35" Color="{DynamicResource ShadowColor}"/>
 
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="ButtonBorder"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="7"
-                                Padding="{TemplateBinding Padding}">
+            <Style x:Key="LinkButtonStyle" TargetType="Button">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Foreground" Value="{DynamicResource WhiteTextBrush}"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
 
-                            <Border.Effect>
-                                <DropShadowEffect x:Name="ButtonGlow"
-                                                  Color="#2563EB"
-                                                  BlurRadius="10"
-                                                  ShadowDepth="0"
-                                                  Opacity="0.22"/>
-                            </Border.Effect>
+            <Style x:Key="FlashStartButton" TargetType="Button">
+                <Setter Property="Foreground" Value="{DynamicResource WhiteTextBrush}"/>
+                <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Padding" Value="10,11"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource AccentBorderBrush}"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="HorizontalContentAlignment" Value="Center"/>
 
-                            <ContentPresenter HorizontalAlignment="Center"
-                                              VerticalAlignment="Center"/>
-                        </Border>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="ButtonBorder"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="7"
+                                    Padding="{TemplateBinding Padding}">
 
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="ButtonBorder" Property="Background" Value="#3B82F6"/>
-                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="#93C5FD"/>
-                            </Trigger>
+                                <Border.Effect>
+                                    <DropShadowEffect x:Name="ButtonGlow"
+                                                      Color="{DynamicResource AccentColor}"
+                                                      BlurRadius="10"
+                                                      ShadowDepth="0"
+                                                      Opacity="0.22"/>
+                                </Border.Effect>
 
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="ButtonBorder" Property="Background" Value="#1D4ED8"/>
-                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="#2563EB"/>
-                            </Trigger>
+                                <ContentPresenter HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"/>
+                            </Border>
 
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="ButtonBorder" Property="Background" Value="#252832"/>
-                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="#343744"/>
-                                <Setter Property="Foreground" Value="#777D8B"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource AccentHoverBrush}"/>
+                                    <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="{DynamicResource AccentHoverBorderBrush}"/>
+                                </Trigger>
 
-        <Style x:Key="ModernTextBox" TargetType="TextBox">
-            <Setter Property="Background" Value="#222328"/>
-            <Setter Property="Foreground" Value="#F0F0F5"/>
-            <Setter Property="BorderBrush" Value="#32343D"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="10,8"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="TextBox">
-                        <Border Background="{TemplateBinding Background}" 
-                                BorderBrush="{TemplateBinding BorderBrush}" 
-                                BorderThickness="{TemplateBinding BorderThickness}" 
-                                CornerRadius="6">
-                            <ScrollViewer x:Name="PART_ContentHost" Margin="2"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource AccentPressedBrush}"/>
+                                    <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                </Trigger>
 
-        <Style x:Key="ModernButton" TargetType="Button">
-            <Setter Property="Background" Value="#2B2D35"/>
-            <Setter Property="Foreground" Value="#E6E6EB"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="border" 
-                                Background="{TemplateBinding Background}" 
-                                CornerRadius="6" 
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter x:Name="content" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#383A45"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#1E1F24"/>
-                            </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource DisabledButtonBackgroundBrush}"/>
+                                    <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="{DynamicResource DisabledButtonBorderBrush}"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource DisabledButtonTextBrush}"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
 
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="border" Property="Background" Value="#2A2B30"/>
-                                <Setter Property="Foreground" Value="#656770"/>
-                                <Setter Property="Cursor" Value="Arrow"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+            <Style x:Key="ModernTextBox" TargetType="TextBox">
+                <Setter Property="Background" Value="{DynamicResource InputBackgroundBrush}"/>
+                <Setter Property="Foreground" Value="{DynamicResource InputTextBrush}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource InputBorderBrush}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Padding" Value="10,8"/>
+                <Setter Property="FontSize" Value="13"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="TextBox">
+                            <Border Background="{TemplateBinding Background}" 
+                                    BorderBrush="{TemplateBinding BorderBrush}" 
+                                    BorderThickness="{TemplateBinding BorderThickness}" 
+                                    CornerRadius="6">
+                                <ScrollViewer x:Name="PART_ContentHost" Margin="2"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
 
-        <Style x:Key="ManualStartButton" TargetType="Button" BasedOn="{StaticResource ModernButton}">
-            <Setter Property="Padding" Value="12,9"/>
-            <Setter Property="FontSize" Value="11"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Foreground" Value="#D4D4D8"/>
-            <Setter Property="Background" Value="#303139"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="BorderBrush" Value="#41424C"/>
+            <Style x:Key="ModernButton" TargetType="Button">
+                <Setter Property="Background" Value="{DynamicResource ButtonBackgroundBrush}"/>
+                <Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
+                <Setter Property="FontSize" Value="13"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="border" 
+                                    Background="{TemplateBinding Background}" 
+                                    CornerRadius="6" 
+                                    Padding="{TemplateBinding Padding}">
+                                <ContentPresenter x:Name="content" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="border" Property="Background" Value="{DynamicResource ButtonHoverBrush}"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="border" Property="Background" Value="{DynamicResource ButtonPressedBrush}"/>
+                                </Trigger>
 
-            <Style.Triggers>
-                <DataTrigger Binding="{Binding IsAutoFlashEnabled}" Value="False">
-                    <Setter Property="Background" Value="#2563EB"/>
-                    <Setter Property="Foreground" Value="#FFFFFF"/>
-                    <Setter Property="BorderBrush" Value="#3B82F6"/>
-                    <Setter Property="IsEnabled" Value="True"/>
-                </DataTrigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter TargetName="border" Property="Background" Value="{DynamicResource DisabledButtonHoverBackgroundBrush}"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource DisabledTextBrush}"/>
+                                    <Setter Property="Cursor" Value="Arrow"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
 
-                <DataTrigger Binding="{Binding IsAutoFlashEnabled}" Value="True">
-                    <Setter Property="Background" Value="#292A30"/>
-                    <Setter Property="Foreground" Value="#92939D"/>
-                    <Setter Property="BorderBrush" Value="#383941"/>
-                    <Setter Property="IsEnabled" Value="False"/>
-                </DataTrigger>
-            </Style.Triggers>
-        </Style>
+            <Style x:Key="ManualStartButton" TargetType="Button" BasedOn="{StaticResource ModernButton}">
+                <Setter Property="Padding" Value="12,9"/>
+                <Setter Property="FontSize" Value="11"/>
+                <Setter Property="FontWeight" Value="Bold"/>
+                <Setter Property="Foreground" Value="{DynamicResource ManualButtonTextBrush}"/>
+                <Setter Property="Background" Value="{DynamicResource ManualButtonBackgroundBrush}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource ManualButtonBorderBrush}"/>
 
-        <Style x:Key="WindowControlButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="#A0A0B0"/>
-            <Setter Property="Width" Value="40"/>
-            <Setter Property="Height" Value="32"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="bg" Background="{TemplateBinding Background}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="bg" Property="Background" Value="#2B2D35"/>
-                                <Setter Property="Foreground" Value="#FFFFFF"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsAutoFlashEnabled}" Value="False">
+                        <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                        <Setter Property="Foreground" Value="{DynamicResource WhiteTextBrush}"/>
+                        <Setter Property="BorderBrush" Value="{DynamicResource AccentHoverBrush}"/>
+                        <Setter Property="IsEnabled" Value="True"/>
+                    </DataTrigger>
+
+                    <DataTrigger Binding="{Binding IsAutoFlashEnabled}" Value="True">
+                        <Setter Property="Background" Value="{DynamicResource InactiveButtonBackgroundBrush}"/>
+                        <Setter Property="Foreground" Value="{DynamicResource InactiveButtonTextBrush}"/>
+                        <Setter Property="BorderBrush" Value="{DynamicResource InactiveButtonBorderBrush}"/>
+                        <Setter Property="IsEnabled" Value="False"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="WindowControlButtonStyle" TargetType="Button">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Foreground" Value="{DynamicResource WindowControlTextBrush}"/>
+                <Setter Property="Width" Value="40"/>
+                <Setter Property="Height" Value="32"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="bg" Background="{TemplateBinding Background}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="bg" Property="Background" Value="{DynamicResource ButtonBackgroundBrush}"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource WhiteTextBrush}"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="ClearButtonStyle" TargetType="Button">
+                <Setter Property="Background" Value="{DynamicResource DangerBackgroundBrush}"/>
+                <Setter Property="Foreground" Value="{DynamicResource DangerBrush}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource DangerBrush}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="ButtonBorder"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="6"
+                                    Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"/>
+                            </Border>
+
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource DangerBrush}"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource WhiteTextBrush}"/>
+                                    <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="{DynamicResource DangerBrush}"/>
+                                </Trigger>
+
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="ButtonBorder" Property="Opacity" Value="0.75"/>
+                                </Trigger>
+
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter TargetName="ButtonBorder" Property="Opacity" Value="0.45"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="SettingsButtonStyle" TargetType="Button" BasedOn="{StaticResource WindowControlButtonStyle}">
+                <Setter Property="Width" Value="40"/>
+                <Setter Property="Height" Value="32"/>
+                <Setter Property="Foreground" Value="{DynamicResource AccentLightBrush}"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="ToolTip" Value="Налаштування"/>
+            </Style>
+        </ResourceDictionary>
     </Window.Resources>
 
-    <Grid>
+    <Grid Background="{DynamicResource WindowBackgroundBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <!-- TITLEBAR -->
-        <Grid Grid.Row="0" Background="#0A0A0B" MouseDown="TitleBar_MouseDown">
+        <Grid Grid.Row="0" Background="{DynamicResource TitleBarBackgroundBrush}" MouseDown="TitleBar_MouseDown">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
@@ -218,7 +321,7 @@
                        VerticalAlignment="Center"
                        Margin="0,0,12,0"/>
                 <TextBlock Text="РУКА ДОПОМОГИ"
-                           Foreground="#E1E1E6"
+                           Foreground="{DynamicResource PrimaryTextBrush}"
                            FontSize="13"
                            FontWeight="Bold"
                            VerticalAlignment="Center"/>
@@ -228,6 +331,16 @@
                         Orientation="Horizontal"
                         HorizontalAlignment="Right"
                         Margin="0,0,12,0">
+                <Button Click="SettingsButton_Click"
+                        Style="{StaticResource SettingsButtonStyle}"
+                        ToolTip="Налаштування тем">
+                    <TextBlock Text="&#xE713;"
+                               FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets"
+                               FontSize="16"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Center"/>
+                </Button>
+
                 <Button Click="MinimizeButton_Click"
                         Style="{StaticResource WindowControlButtonStyle}"
                         ToolTip="Згорнути">
@@ -264,12 +377,12 @@
                 </Grid.RowDefinitions>
 
                 <!-- 1. Firmware -->
-                <Border Grid.Row="0" Background="#1A1B22" CornerRadius="8" Padding="16,14" Margin="0,0,0,12" BorderBrush="#23242B" BorderThickness="1">
+                <Border Grid.Row="0" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="8" Padding="16,14" Margin="0,0,0,12" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                     <StackPanel>
                         <Grid Margin="0,0,0,10">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock Text="1. Файл прошивки" Foreground="#EDEDF2" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"/>
-                                <TextBlock Text="(.hex)" Foreground="#70707D" FontSize="12" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="1. Файл прошивки" Foreground="{DynamicResource HeadingTextBrush}" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"/>
+                                <TextBlock Text="(.hex)" Foreground="{DynamicResource MutedTextBrush}" FontSize="12" Margin="6,0,0,0" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Grid>
 
@@ -284,10 +397,17 @@
                                      Style="{StaticResource ModernTextBox}" 
                                      Text="{Binding FirmwarePath, UpdateSourceTrigger=PropertyChanged}"/>
 
-                            <Button Grid.Column="1" Style="{StaticResource ModernButton}" 
-                                    Background="#352626" Foreground="#E55A5A"
-                                    Command="{Binding ClearFirmwareCommand}" Margin="8,0,0,0" Padding="12,8" ToolTip="Очистити прошивку">
-                                <TextBlock Text="&#xE711;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="11" FontWeight="Bold" VerticalAlignment="Center"/>
+                            <Button Grid.Column="1"
+                                    Style="{StaticResource ClearButtonStyle}"
+                                    Command="{Binding ClearFirmwareCommand}"
+                                    Margin="8,0,0,0"
+                                    Padding="12,8"
+                                    ToolTip="Очистити прошивку">
+                                <TextBlock Text="&#xE711;"
+                                           FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets"
+                                           FontSize="11"
+                                           FontWeight="Bold"
+                                           VerticalAlignment="Center"/>
                             </Button>
 
                             <Button Grid.Column="2" Style="{StaticResource ModernButton}" 
@@ -302,10 +422,10 @@
                 </Border>
 
                 <!-- 2. Configuration -->
-                <Border Grid.Row="1" Background="#1A1B22" CornerRadius="8" Padding="16,14" Margin="0,0,0,16" BorderBrush="#23242B" BorderThickness="1">
+                <Border Grid.Row="1" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="8" Padding="16,14" Margin="0,0,0,16" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                     <StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                            <TextBlock Text="2. Конфігурація (Dump / Diff / Backup)" Foreground="#EDEDF2" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"/>
+                            <TextBlock Text="2. Конфігурація (Dump / Diff / Backup)" Foreground="{DynamicResource HeadingTextBrush}" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"/>
                         </StackPanel>
 
                         <Grid>
@@ -319,10 +439,17 @@
                                      Style="{StaticResource ModernTextBox}" 
                                      Text="{Binding DumpPath, UpdateSourceTrigger=PropertyChanged}"/>
 
-                            <Button Grid.Column="1" Style="{StaticResource ModernButton}" 
-                                    Background="#352626" Foreground="#E55A5A"
-                                    Command="{Binding ClearDumpCommand}" Margin="8,0,0,0" Padding="12,8" ToolTip="Очистити конфігурацію">
-                                <TextBlock Text="&#xE711;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="11" FontWeight="Bold" VerticalAlignment="Center"/>
+                            <Button Grid.Column="1"
+                                    Style="{StaticResource ClearButtonStyle}"
+                                    Command="{Binding ClearDumpCommand}"
+                                    Margin="8,0,0,0"
+                                    Padding="12,8"
+                                    ToolTip="Очистити прошивку">
+                                <TextBlock Text="&#xE711;"
+                                           FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets"
+                                           FontSize="11"
+                                           FontWeight="Bold"
+                                           VerticalAlignment="Center"/>
                             </Button>
 
                             <Button Grid.Column="2" Style="{StaticResource ModernButton}" 
@@ -337,10 +464,10 @@
                 </Border>
 
                 <!-- 3. RUN MODE -->
-                <Border Grid.Row="2" Background="#15161A" BorderBrush="#292A30" BorderThickness="1" CornerRadius="12" Padding="14" Margin="0,0,0,12">
+                <Border Grid.Row="2" Background="{DynamicResource CardSecondaryBackgroundBrush}" BorderBrush="{DynamicResource InactiveButtonBackgroundBrush}" BorderThickness="1" CornerRadius="12" Padding="14" Margin="0,0,0,12">
                     <StackPanel>
                         <Grid Margin="0,0,0,14">
-                            <TextBlock Text="РЕЖИМ ЗАПУСКУ" FontSize="11" FontWeight="Bold" Foreground="#85858F" VerticalAlignment="Center"/>
+                            <TextBlock Text="РЕЖИМ ЗАПУСКУ" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SectionLabelBrush}" VerticalAlignment="Center"/>
                         </Grid>
 
                         <Grid>
@@ -353,12 +480,12 @@
                             <Border Grid.Column="0" CornerRadius="10" Padding="12" Margin="0,0,6,0" BorderThickness="1" Cursor="Hand" MouseLeftButtonUp="ManualFlashCard_MouseLeftButtonUp">
                                 <Border.Style>
                                     <Style TargetType="Border">
-                                        <Setter Property="Background" Value="#1B1C22"/>
-                                        <Setter Property="BorderBrush" Value="#30313A"/>
+                                        <Setter Property="Background" Value="{DynamicResource ModeCardBackgroundBrush}"/>
+                                        <Setter Property="BorderBrush" Value="{DynamicResource SecondaryBorderBrush}"/>
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsAutoFlashEnabled}" Value="False">
-                                                <Setter Property="Background" Value="#172B4D"/>
-                                                <Setter Property="BorderBrush" Value="#3B82F6"/>
+                                                <Setter Property="Background" Value="{DynamicResource SelectedCardBackgroundBrush}"/>
+                                                <Setter Property="BorderBrush" Value="{DynamicResource AccentHoverBrush}"/>
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
@@ -371,7 +498,7 @@
                                     </Grid.ColumnDefinitions>
 
                                     <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="2,0,6,0">
-                                        <TextBlock Text="Ручний запуск" FontSize="12" FontWeight="SemiBold" Foreground="#F4F4F5"/>
+                                        <TextBlock Text="Ручний запуск" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource ModeTextBrush}"/>
                                     </StackPanel>
 
                                     <Button Grid.Column="1"
@@ -392,12 +519,12 @@
                             <Border Grid.Column="1" CornerRadius="10" Padding="12" Margin="6,0,0,0" BorderThickness="1" Cursor="Hand" MouseLeftButtonUp="AutoFlashCard_MouseLeftButtonUp">
                                 <Border.Style>
                                     <Style TargetType="Border">
-                                        <Setter Property="Background" Value="#1B1C22"/>
-                                        <Setter Property="BorderBrush" Value="#30313A"/>
+                                        <Setter Property="Background" Value="{DynamicResource ModeCardBackgroundBrush}"/>
+                                        <Setter Property="BorderBrush" Value="{DynamicResource SecondaryBorderBrush}"/>
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsAutoFlashEnabled}" Value="True">
-                                                <Setter Property="Background" Value="#172B4D"/>
-                                                <Setter Property="BorderBrush" Value="#3B82F6"/>
+                                                <Setter Property="Background" Value="{DynamicResource SelectedCardBackgroundBrush}"/>
+                                                <Setter Property="BorderBrush" Value="{DynamicResource AccentHoverBrush}"/>
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
@@ -409,12 +536,12 @@
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <Border Width="32" Height="32" CornerRadius="8" Background="#252C3B" VerticalAlignment="Center">
-                                        <TextBlock Text="↻" FontSize="18" Foreground="#60A5FA" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <Border Width="32" Height="32" CornerRadius="8" Background="{DynamicResource AutoIconBackgroundBrush}" VerticalAlignment="Center">
+                                        <TextBlock Text="↻" FontSize="18" Foreground="{DynamicResource AccentLightBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Border>
 
                                     <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="9,0,0,0">
-                                        <TextBlock Text="Автозавантаження" FontSize="12" FontWeight="SemiBold" Foreground="#F4F4F5"/>
+                                        <TextBlock Text="Автозавантаження" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource ModeTextBrush}"/>
                                     </StackPanel>
                                 </Grid>
                             </Border>
@@ -423,18 +550,49 @@
                 </Border>
 
                 <!-- 4. STATUS -->
-                <Border Grid.Row="3" Background="#1A1B22" CornerRadius="8" BorderThickness="1.5" BorderBrush="{Binding StatusBrush}" Effect="{StaticResource CardShadow}">
-                    <Grid>
-                        <Border Background="{Binding StatusBrush}" Opacity="0.08" CornerRadius="7"/>
-                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="16">
-                            <TextBlock Text="{Binding StatusText}" Foreground="{Binding StatusBrush}" FontSize="16" FontWeight="Bold" TextWrapping="Wrap" TextAlignment="Center"/>
-                        </StackPanel>
+                <Border Grid.Row="3"
+                        Background="{DynamicResource CardBackgroundBrush}"
+                        CornerRadius="8"
+                        BorderThickness="1"
+                        BorderBrush="{DynamicResource SecondaryBorderBrush}"
+                        Effect="{StaticResource CardShadow}">
+
+                    <Grid ClipToBounds="True">
+                        <Border Background="{Binding StatusBrush}"
+                                Opacity="0.12"
+                                CornerRadius="7"/>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="5"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Border Grid.Column="0"
+                                    Background="{Binding StatusBrush}"
+                                    CornerRadius="7,0,0,7"
+                                    Margin="0"/>
+
+                            <Border Grid.Column="1"
+                                    Padding="12,10"
+                                    Background="Transparent">
+
+                                <TextBlock Text="{Binding StatusText}"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           FontSize="14"
+                                           FontWeight="SemiBold"
+                                           TextWrapping="Wrap"
+                                           TextAlignment="Center"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"/>
+                            </Border>
+                        </Grid>
                     </Grid>
                 </Border>
+
             </Grid>
 
-            <!-- RIGHT COLUMN: CLI Console -->
-            <Border Grid.Column="2" Background="#0C0D0E" CornerRadius="8" BorderBrush="#23242B" BorderThickness="1">
+            <Border Grid.Column="2" Background="{DynamicResource ConsoleBackgroundBrush}" CornerRadius="8" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                 <Grid Margin="12">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -448,21 +606,21 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="CLI Консоль" FontWeight="Bold" FontSize="12" Foreground="#8B8D98"/>
+                            <TextBlock Text="CLI Консоль" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}"/>
                         </StackPanel>
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal">
                             <Button Content="Копіювати"
                                     Command="{Binding CopyLogCommand}"
                                     Style="{StaticResource LinkButtonStyle}"
-                                    Foreground="#60A5FA"
+                                    Foreground="{DynamicResource AccentLightBrush}"
                                     FontSize="11"
                                     Margin="0,0,12,0"/>
 
                             <Button Content="Очистити"
                                     Command="{Binding ClearLogCommand}"
                                     Style="{StaticResource LinkButtonStyle}"
-                                    Foreground="#71717A"
+                                    Foreground="{DynamicResource MutedActionTextBrush}"
                                     FontSize="11"/>
                         </StackPanel>
                     </Grid>
