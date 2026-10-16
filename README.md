@@ -1,8 +1,16 @@
 <div align="center">
+  <h1>DroneFlasher</h1>
 
-# DroneFlasher
+  <img
+    src="https://github.com/user-attachments/assets/0dfcea53-07e5-4a13-b9b5-e77664630f9c"
+    width="64"
+    alt="DroneFlasher Logo"
+  />
 
-**A fast, reliable Windows desktop utility for flashing STM32-based flight controllers, ExpressLRS receivers, and rapidly restoring CLI configurations via USB.**
+  <p>
+    <b>A Windows desktop application designed to simplify drone firmware management and device configuration.</b>
+  </p>
+</div>
 
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011-blue.svg?style=flat-square)](#)
 [![Framework](https://img.shields.io/badge/.NET-10.0-512BD4.svg?style=flat-square)](#)
@@ -12,18 +20,32 @@
 
 ## 📝 Overview
 
-**DroneFlasher** is a lightweight, C# (WPF) alternative to heavy drone configurators. It allows you to easily update device firmware using the native STM32 DFU Bootloader mode, and seamlessly restore flight controller configurations (dumps/diffs) without dealing with manual CLI copy-pasting.
+<p align="justify">
+  <strong>DroneFlasher</strong> is a lightweight C# (WPF) alternative to bulky drone configurators. It simplifies firmware updates via the native STM32 DFU Bootloader and makes restoring flight controller configurations (dumps/diffs) easy, without manual CLI copy-pasting.
+</p>
+
 
 ## ✨ Key Features
 
-- **Dual Operation Modes:** 
-  - *Manual Mode:* Standard on-demand execution for single devices.
-  - *Automatic Mode:* Continuous USB tracking for batch processing. Simply plug in a device, let it process automatically, unplug, and connect the next one.
-- **Configuration Restoring:** Apply CLI backups (dumps or diffs) directly over the serial port. The app utilizes `batch` mode for fast transmission, automatically filters out redundant commands (like `reboot` or duplicate `save`), and provides real-time error tracking.
-- **Automatic DFU Transition:** Automatically reboots devices from virtual COM port mode (Betaflight/INAV) into the STM32 DFU bootloader (`#` and `bl` commands).
-- **Format Support:** Built-in custom parser exclusively for `.hex` firmware files to ensure precise memory address mapping.
-- **Full Flashing Cycle:** Safely handles interface claiming, status clearing (CLRSTATUS), Mass Erase, chunked memory writing, and automatic device reboot.
-- **Truly Portable (Single Executable):** Packaged as a single standalone `.exe` file with embedded native USB libraries. No installations or `.dll` clutter required.
+- **Dual Operation Modes**
+  - **Manual Mode:** Flash and configure individual devices on demand.
+  - **Automatic Mode:** Detects USB device connections and processes devices sequentially, enabling convenient batch operations.
+
+- **Configuration Restoration**  
+  Restore flight controller configurations from CLI backups (`.dump` / `.diff`) directly over the serial port. Uses Betaflight CLI batch mode for efficient transmission, filters redundant commands such as `reboot` and duplicate `save` instructions, and tracks errors in real time.
+
+- **Automatic DFU Transition**  
+  Automatically reboots compatible flight controllers from virtual COM port mode (Betaflight/INAV) into the STM32 DFU bootloader using the `#` and `bl` commands.
+
+- **Intel HEX Firmware Support**  
+  Supports `.hex` firmware files with a custom parser for accurate memory address mapping.
+
+- **Complete Flashing Workflow**  
+  Handles USB interface claiming, status clearing (`CLRSTATUS`), mass erase, chunked firmware writing, and automatic device reboot.
+
+- **Portable Single-File Executable**  
+  Distributed as a standalone `.exe` with embedded native USB libraries. No installation required and no separate `.dll` files to manage.
+
 
 ## 🖼️ Screenshots
 
@@ -80,31 +102,56 @@ dotnet publish -c Release -r win-x64 --self-contained false -p:PublishSingleFile
 dotnet publish -c Release -r win-x64 -p:PublishSingleFile=true --self-contained true
 ```
 
-## 📖 Usage Guide
+## 🚀 Getting Started
 
-DroneFlasher handles both firmware updates and configuration restoration. You can choose how the application interacts with your devices based on your workflow:
+### 1. Choose Your Workflow
 
-### 1. Choose Your Workflow (Auto vs. Manual)
-- **Automatic Mode (Batch Processing):** Select this mode and load your target file *before* plugging anything in. DroneFlasher will actively listen for USB connections. Once you plug a device in, it processes it immediately. When finished, unplug it and connect the next board — perfect for configuring multiple drones in a row.
-- **Manual Mode:** Connect your device first, let it appear in the port list, select your file, and manually click the Start button.
+**Automatic Mode — Batch Processing**
 
-### 2. Flashing Firmware (.hex)
-1. Select your `.hex` firmware file.
-2. If the device is running normally, DroneFlasher will automatically reboot it into DFU mode. If it's already in DFU mode (via the physical `BOOT` button), it is detected instantly.
-3. The application will perform a Mass Erase, write the new memory blocks, and reboot the flight controller.
+1. Select **Automatic Mode**.
+2. Load the firmware or configuration file before connecting a device.
+3. Connect a flight controller. DroneFlasher will detect and process it automatically.
+4. Once processing is complete, disconnect the device and connect the next one.
 
-### 3. Restoring Configuration (Dump / Diff)
-1. Select your text-based configuration backup file (e.g., `dump.txt`).
-2. DroneFlasher connects to the active COM port and executes the commands.
-3. It automatically wraps the process in `batch start` / `batch end` for faster writing, ignores invalid structural commands, logs any CLI syntax errors, and finalizes the setup with a `save` command.
+Ideal for configuring multiple devices in sequence.
 
-## ⚠️ Troubleshooting
+**Manual Mode — On-Demand Processing**
 
-| Issue | Solution |
-| :--- | :--- |
-| **Device not found (DFU Timeout)** | Try a different USB cable (ensure it has data lines, not charging-only). Check Device Manager to verify the STM32 Bootloader is using the **WinUSB** driver. |
-| **Flashing stops or fails mid-way** | The STM32 bootloader is stored in ROM and cannot be bricked via USB. Simply hold the physical `BOOT` button on your board, reconnect the USB, and try again. |
-| **CLI Errors during Configuration** | Check the log window. The app isolates and displays specific commands that the flight controller rejected (e.g., due to firmware version mismatches). |
+1. Connect your device via USB.
+2. Wait for it to appear in the available port list.
+3. Select the firmware or configuration file.
+4. Click **Start** to begin processing.
+
+### 2. Flashing Firmware (`.hex`)
+
+1. Select the target `.hex` firmware file.
+2. Connect your flight controller:
+   - **Normal mode:** DroneFlasher attempts to reboot the device into DFU mode automatically.
+   - **DFU mode:** If the device is already in DFU mode, for example via the physical `BOOT` button, it will be detected directly.
+3. Wait for the flashing process to complete. DroneFlasher performs a mass erase, writes the firmware to the appropriate memory addresses, and reboots the device.
+
+### 3. Restoring Configuration (`Dump` / `Diff`)
+
+1. Select your configuration backup file, such as `dump.txt` or a `.diff` file.
+2. Connect your flight controller and ensure its virtual COM port is available.
+3. Start the process and let DroneFlasher execute the configuration commands.
+4. The application uses `batch start` / `batch end` to streamline command execution, filters unsupported structural commands, and reports CLI errors in the log.
+5. The process is finalized with a `save` command to apply the configuration.
+
+---
+
+## 🛠️ Troubleshooting
+
+| Issue | Possible Solution |
+|:------|:------------------|
+| **Device not detected (DFU timeout)** | Try a different USB cable that supports data transfer. In Windows Device Manager, check that the STM32 Bootloader is using a compatible **WinUSB** driver. |
+| **Flashing fails or stops midway** | Check the USB connection and retry. If necessary, disconnect the board, hold the physical `BOOT` button while reconnecting USB, and start the process again. |
+| **CLI errors during configuration** | Review the application log to identify rejected commands. Errors may occur when commands are incompatible with the installed firmware version. |
+
+---
+
+> **Tip:** For reliable results, use a data-capable USB cable and ensure that the selected firmware or configuration file matches your flight controller.
+
 
 ## 📄 License
 
