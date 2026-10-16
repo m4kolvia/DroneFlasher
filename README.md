@@ -46,12 +46,35 @@
 
 ### Installation
 
-1. Download the latest `DroneFlasher.exe` from the [Releases](#) page.
-2. Run it directly from anywhere on your PC (no installation required!).
+Download the version that best fits your system from the
+[Releases](#) page.
+
+#### Option 1: Framework-Dependent (Smaller File)
+
+- Download the smaller executable.
+- Requires the compatible .NET 10 Desktop Runtime to be installed.
+- Uses less disk space.
+- If the application fails to start, install the [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/10.0).
+
+#### Option 2: Self-Contained (Standalone)
+
+- Download the standalone executable.
+- Includes the .NET Runtime required by the application.
+- Does not require a separate .NET Runtime installation.
+- The executable is larger, but is more convenient for clean Windows computers.
+
+> **Note:** Both versions require any necessary device drivers and native dependencies to be available. Self-contained deployment does not automatically eliminate every external dependency.
 
 ### Building from Source
 
-The project is pre-configured to embed all native libraries directly into the output file. To build the standalone executable yourself, run this command in the project root:
+Run the appropriate command from the project root.
+
+**Option 1 — Smaller executable:**
+
+```bash
+dotnet publish -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -p:DebugType=None -p:DebugSymbols=false
+```
+**Option 2 — Self-contained executable:**
 
 ```bash
 dotnet publish -c Release -r win-x64 -p:PublishSingleFile=true --self-contained true
