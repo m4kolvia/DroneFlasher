@@ -11,7 +11,7 @@ namespace DroneFlasher.Services;
 
 public class DfuService : IDisposable
 {
-    private const bool TestOnly = true;
+    private const bool TestOnly = false;
 
     public record DfuStatusInfo(byte Status, uint PollTimeoutMs, byte State, byte StringIndex);
 
@@ -202,11 +202,11 @@ public class DfuService : IDisposable
                     throw new InvalidOperationException($"DFU не готовий до запису. Поточний State={initialStatus.State}");
 
                 logProgress?.Report(new LogEntry("[DFU] ✓ DFU знаходиться у стані IDLE.", Brushes.LimeGreen));
-
-                // ====================================================
-                // TEST ONLY
-                // ====================================================
-
+               
+                /*
+                - TEST ONLY MODE
+                - If TestOnly = true, Mass Erase and Flash writing are skipped.
+                - This allows testing the DFU workflow without actually erasing or writing data.
                 if (TestOnly)
                 {
                     logProgress?.Report(new LogEntry("[DFU] 🛑 TEST ONLY: Mass Erase пропущено.", Brushes.Gold));
@@ -216,26 +216,15 @@ public class DfuService : IDisposable
 
                     await LeaveDfuAsync(device, logProgress, ct);
 
-                    //return;
-                }
-                return false;
-
-                /*
-                #region MASS ERASE
-                // ----------------------------------------------------
-                // 4. MASS ERASE
-                // ----------------------------------------------------
-
+                    return;
+                }*/
+                
                 statusProgress?.Report("Стирання Flash-пам'яті...");
                 logProgress?.Report(new LogEntry("[DFU] Початок Mass Erase...", Brushes.Orange));
 
                 await ExecuteMassEraseAsync(device, logProgress, ct);
 
                 logProgress?.Report(new LogEntry("[DFU] ✓ Mass Erase завершено, DFU готовий до запису.", Brushes.LimeGreen));
-
-                // ----------------------------------------------------
-                // 5. ЗАПИС
-                // ----------------------------------------------------
 
                 int writtenBytes = 0;
                 var progressWatch = Stopwatch.StartNew();
@@ -246,10 +235,8 @@ public class DfuService : IDisposable
 
                     logProgress?.Report(new LogEntry($"[DFU] Запис сегмента 0x{block.Address:X8}, {block.Data.Length} байт.", Brushes.LightBlue));
 
-                    // Встановлюємо адресу початку сегмента.
                     await SetAddressAsync(device, block.Address, ct);
 
-                    // GPT ПРАВИЙ: Для кожного нового сегмента нумерація блоків МАЄ починатися з 2!
                     ushort blockNumber = 2;
                     int offset = 0;
 
@@ -257,7 +244,7 @@ public class DfuService : IDisposable
                     {
                         ct.ThrowIfCancellationRequested();
 
-                        int chunkSize = Math.Min(TransferBlockSize, block.Data.Length - offset);
+                        int chunkSize = Math.Min(DfuConstants.TransferBlockSize, block.Data.Length - offset);
                         byte[] chunk = new byte[chunkSize];
                         Buffer.BlockCopy(block.Data, offset, chunk, 0, chunkSize);
 
@@ -275,18 +262,15 @@ public class DfuService : IDisposable
                     }
                 }
 
-                // ----------------------------------------------------
-                // 6. ФІНАЛІЗАЦІЯ
-                // ----------------------------------------------------
-
-                statusProgress?.Report("Завершення DFU...");
+                statusProgress?.Report("Запуск прошивки...");
+                logProgress?.Report(new LogEntry("[DFU] Перезавантаження контролера...", Brushes.LightBlue));
 
                 await LeaveDfuAsync(device, logProgress, ct);
 
-                logProgress?.Report(new LogEntry("[DFU] ✓ DFU завершено.", Brushes.LimeGreen));
+                statusProgress?.Report("Готово!");
+                logProgress?.Report(new LogEntry("[DFU] ✓ Прошивання успішно завершено!", Brushes.LimeGreen));
 
                 return true;
-                #endregion*/
             }
             finally
             {
