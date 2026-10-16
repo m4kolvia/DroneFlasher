@@ -14,7 +14,7 @@ namespace DroneFlasher.Views
 
             DataContext = viewModel;
 
-            ThemeManager.ApplyTheme(this, ThemeManager.CurrentThemeKey);
+            ThemeManager.LoadSettings(this);
         }
 
         private void TitleBar_MouseDown(object sender, MouseButtonEventArgs e)

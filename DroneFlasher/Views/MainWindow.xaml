@@ -298,7 +298,9 @@
         </ResourceDictionary>
     </Window.Resources>
 
-    <Grid Background="{DynamicResource WindowBackgroundBrush}">
+    <Grid x:Name="MainRootGrid"
+      x:FieldModifier="public"
+      Background="Transparent">
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>
             <RowDefinition Height="*"/>

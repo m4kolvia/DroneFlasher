@@ -1,18 +1,64 @@
 ﻿using DroneFlasher.Helpers;
-using System;
+using DroneFlasher.Models;
+using Microsoft.Win32;
 using System.Collections.ObjectModel;
-using System.Linq;
+using System.ComponentModel;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 
 namespace DroneFlasher.Views
 {
-    public partial class ThemeSettingsWindow : Window
+    public partial class ThemeSettingsWindow : Window, INotifyPropertyChanged
     {
         private readonly ObservableCollection<ThemeOption> _themes;
         private readonly MainWindow _mainWindow;
+
+        private bool _hasBackgroundImage;
+        private string _backgroundImagePath = string.Empty;
+        private string _backgroundImageName = string.Empty;
+
+        public bool HasBackgroundImage
+        {
+            get => _hasBackgroundImage;
+            private set
+            {
+                if (_hasBackgroundImage == value)
+                    return;
+
+                _hasBackgroundImage = value;
+                OnPropertyChanged(nameof(HasBackgroundImage));
+            }
+        }
+
+        public string BackgroundImagePath
+        {
+            get => _backgroundImagePath;
+            private set
+            {
+                if (_backgroundImagePath == value)
+                    return;
+
+                _backgroundImagePath = value;
+                OnPropertyChanged(nameof(BackgroundImagePath));
+            }
+        }
+
+        public string BackgroundImageName
+        {
+            get => _backgroundImageName;
+            private set
+            {
+                if (_backgroundImageName == value)
+                    return;
+
+                _backgroundImageName = value;
+                OnPropertyChanged(nameof(BackgroundImageName));
+            }
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         public ThemeSettingsWindow(MainWindow mainWindow)
         {
@@ -21,7 +67,11 @@ namespace DroneFlasher.Views
             _mainWindow = mainWindow;
             Owner = mainWindow;
 
+            // Залишаємо ресурси поточної теми головного вікна.
             Resources.MergedDictionaries.Add(_mainWindow.Resources);
+
+            // DataContext потрібен для властивостей фонового зображення.
+            DataContext = this;
 
             _themes = new ObservableCollection<ThemeOption>
             {
@@ -36,12 +86,44 @@ namespace DroneFlasher.Views
                 new("Amber", "Теплий бурштиновий", "#F59E0B", "Amber"),
                 new("Graphite", "Стриманий графіт", "#9CA3AF", "Graphite"),
                 new("Cyber Teal", "Кібер-бірюзовий", "#2DD4BF", "CyberTeal"),
-                new("Nebula", "Космічний пурпурний", "#C084FC", "Nebula"),
+                new("Nebula", "Космічний пурпурний", "#C084FC", "Nebula")
             };
 
             ThemesList.ItemsSource = _themes;
 
             MarkSelectedTheme(ThemeManager.CurrentThemeKey);
+
+            // Показуємо поточне фонове зображення, якщо воно є.
+            UpdateBackgroundInfo();
+        }
+
+        private void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(
+                this,
+                new PropertyChangedEventArgs(propertyName));
+        }
+
+        /// <summary>
+        /// Оновлює назву, шлях і видимість інформації про фон.
+        /// </summary>
+        private void UpdateBackgroundInfo()
+        {
+            string? path = ThemeManager.CurrentBackgroundImage;
+
+            bool exists =
+                !string.IsNullOrWhiteSpace(path) &&
+                File.Exists(path);
+
+            HasBackgroundImage = exists;
+
+            BackgroundImagePath = exists
+                ? path!
+                : string.Empty;
+
+            BackgroundImageName = exists
+                ? Path.GetFileName(path!)
+                : string.Empty;
         }
 
         private void ThemeButton_Click(object sender, RoutedEventArgs e)
@@ -54,6 +136,7 @@ namespace DroneFlasher.Views
 
             try
             {
+                // Застосовуємо тему до головного вікна.
                 ThemeManager.ApplyTheme(_mainWindow, themeKey);
 
                 MarkSelectedTheme(themeKey);
@@ -73,11 +156,11 @@ namespace DroneFlasher.Views
         {
             foreach (var theme in _themes)
             {
-                theme.IsSelected = theme.Key == themeKey;
+                theme.IsSelected = string.Equals(
+                    theme.Key,
+                    themeKey,
+                    StringComparison.OrdinalIgnoreCase);
             }
-
-            var selected = _themes.FirstOrDefault(
-                theme => theme.Key == themeKey);
         }
 
         private void TitleBar_MouseLeftButtonDown(
@@ -94,46 +177,60 @@ namespace DroneFlasher.Views
         {
             Close();
         }
-    }
 
-    public sealed class ThemeOption : System.ComponentModel.INotifyPropertyChanged
-    {
-        private bool _isSelected;
-
-        public string Name { get; }
-        public string Description { get; }
-        public string Accent { get; }
-        public string Key { get; }
-
-        public bool IsSelected
+        private void SelectImage_Click(
+            object sender,
+            RoutedEventArgs e)
         {
-            get => _isSelected;
-            set
+            var dlg = new OpenFileDialog
             {
-                if (_isSelected == value)
-                    return;
+                Title = "Оберіть фонове зображення",
+                Filter = "Зображення (*.jpg;*.jpeg;*.png)|*.jpg;*.jpeg;*.png",
+                CheckFileExists = true,
+                Multiselect = false
+            };
 
-                _isSelected = value;
-                PropertyChanged?.Invoke(
+            if (dlg.ShowDialog() != true)
+                return;
+
+            try
+            {
+                ThemeManager.SetBackgroundImage(
+                    _mainWindow,
+                    dlg.FileName);
+
+                UpdateBackgroundInfo();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
                     this,
-                    new System.ComponentModel.PropertyChangedEventArgs(
-                        nameof(IsSelected)));
+                    $"Не вдалося встановити фонове зображення.\n\n{ex.Message}",
+                    "Помилка",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
             }
         }
 
-        public event System.ComponentModel.PropertyChangedEventHandler?
-            PropertyChanged;
-
-        public ThemeOption(
-            string name,
-            string description,
-            string accent,
-            string key)
+        private void ClearImage_Click(
+            object sender,
+            RoutedEventArgs e)
         {
-            Name = name;
-            Description = description;
-            Accent = accent;
-            Key = key;
+            try
+            {
+                ThemeManager.SetBackgroundImage(_mainWindow, null);
+
+                UpdateBackgroundInfo();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    this,
+                    $"Не вдалося очистити фонове зображення.\n\n{ex.Message}",
+                    "Помилка",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
         }
     }
 }
