@@ -1,7 +1,7 @@
-﻿using DroneFlasher.Models;
+﻿using DroneFlasher.Configuration;
 using System.Management;
 
-namespace DroneFlasher.Services;
+namespace DroneFlasher.Services.Usb;
 
 public class FlightControllerWatcherService
 {

@@ -1,4 +1,4 @@
-﻿namespace DroneFlasher.Models;
+﻿namespace DroneFlasher.Constants;
 
 public static class DfuConstants
 {

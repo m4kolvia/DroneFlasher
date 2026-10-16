@@ -1,6 +1,5 @@
 ﻿using DroneFlasher.Helpers;
 using DroneFlasher.Models;
-using DroneFlasher.Services;
 using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -11,6 +10,9 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using LibUsbDotNet.LibUsb;
+using DroneFlasher.Services.Configuration;
+using DroneFlasher.Services.Firmware;
+using DroneFlasher.Services.Usb;
 
 namespace DroneFlasher.ViewModels;
 

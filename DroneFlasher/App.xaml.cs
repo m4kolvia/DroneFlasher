@@ -1,9 +1,11 @@
 ﻿using System.IO;
 using System.Windows;
 using System.Windows.Threading;
+using DroneFlasher.Configuration;
 using DroneFlasher.Helpers;
-using DroneFlasher.Models;
-using DroneFlasher.Services;
+using DroneFlasher.Services.Configuration;
+using DroneFlasher.Services.Firmware;
+using DroneFlasher.Services.Usb;
 using DroneFlasher.ViewModels;
 using DroneFlasher.Views;
 using LibUsbDotNet.LibUsb;

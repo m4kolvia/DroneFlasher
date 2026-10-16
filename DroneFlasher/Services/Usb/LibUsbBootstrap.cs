@@ -2,7 +2,7 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-namespace DroneFlasher.Services;
+namespace DroneFlasher.Services.Usb;
 
 public static class LibUsbBootstrap
 {

@@ -6,7 +6,7 @@ using System.Windows.Media;
 using DroneFlasher.Models;
 using static System.StringComparison;
 
-namespace DroneFlasher.Services;
+namespace DroneFlasher.Services.Configuration;
 
 public class ConfigurationService
 {

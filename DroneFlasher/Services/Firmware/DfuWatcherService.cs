@@ -1,9 +1,9 @@
 ﻿using System.IO.Ports;
 using System.Management;
-using DroneFlasher.Models;
+using DroneFlasher.Constants;
 using LibUsbDotNet.LibUsb;
 
-namespace DroneFlasher.Services;
+namespace DroneFlasher.Services.Firmware;
 
 public class DfuWatcherService : IDisposable
 {

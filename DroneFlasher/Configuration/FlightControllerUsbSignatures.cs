@@ -1,4 +1,4 @@
-﻿namespace DroneFlasher.Models
+﻿namespace DroneFlasher.Configuration
 {
     public class FlightControllerUsbSignatures
     {

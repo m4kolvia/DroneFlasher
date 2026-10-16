@@ -2,12 +2,13 @@
 using System.IO;
 using System.IO.Ports;
 using System.Windows.Media;
+using DroneFlasher.Constants;
 using DroneFlasher.Helpers;
 using DroneFlasher.Models;
 using LibUsbDotNet.LibUsb;
 using LibUsbDotNet.Main;
 
-namespace DroneFlasher.Services;
+namespace DroneFlasher.Services.Firmware;
 
 public class DfuService : IDisposable
 {
