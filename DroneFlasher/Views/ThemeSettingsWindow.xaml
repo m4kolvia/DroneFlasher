@@ -5,33 +5,22 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="Налаштування тем"
-        Width="540"
-        Height="620"
-        MinWidth="540"
-        MinHeight="620"
-        WindowStartupLocation="CenterOwner"
-        WindowStyle="None"
-        AllowsTransparency="True"
-        Background="Transparent"
-        ResizeMode="NoResize"
-        Foreground="{DynamicResource PrimaryTextBrush}">
+        Width="540" Height="620" MinWidth="540" MinHeight="620"
+        WindowStartupLocation="CenterOwner" WindowStyle="None"
+        AllowsTransparency="True" Background="Transparent"
+        ResizeMode="NoResize" Foreground="{DynamicResource PrimaryTextBrush}">
 
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary d:Source="/Themes/Dark.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-
-            <BooleanToVisibilityConverter
-                x:Key="BooleanToVisibilityConverter"/>
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         </ResourceDictionary>
     </Window.Resources>
 
     <Border Background="{DynamicResource WindowBackgroundBrush}"
-            BorderBrush="{DynamicResource SecondaryBorderBrush}"
-            BorderThickness="1"
-            CornerRadius="12">
-
+            BorderBrush="{DynamicResource SecondaryBorderBrush}" BorderThickness="1" CornerRadius="12">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="48"/>
@@ -40,61 +29,26 @@
                 <RowDefinition Height="70"/>
             </Grid.RowDefinitions>
 
-            <Grid Grid.Row="0"
-                  Background="{DynamicResource TitleBarBackgroundBrush}"
-                  MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
-
+            <Grid Grid.Row="0" Background="{DynamicResource TitleBarBackgroundBrush}" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <StackPanel Orientation="Horizontal"
-                            VerticalAlignment="Center"
-                            Margin="18,0,0,0">
-
-                    <TextBlock Text="&#xE713;"
-                               FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets"
-                               FontSize="16"
-                               Foreground="{DynamicResource AccentBrush}"
-                               VerticalAlignment="Center"
-                               Margin="0,0,10,0"/>
-
-                    <TextBlock Text="НАЛАШТУВАННЯ ТЕМ"
-                               FontSize="12"
-                               FontWeight="Bold"
-                               Foreground="{DynamicResource PrimaryTextBrush}"
-                               VerticalAlignment="Center"/>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="18,0,0,0">
+                    <TextBlock Text="&#xE713;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="16" Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <TextBlock Text="НАЛАШТУВАННЯ ТЕМ" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
                 </StackPanel>
 
-                <Button Grid.Column="1"
-                        Content="&#xE8BB;"
-                        FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets"
-                        FontSize="12"
-                        Foreground="{DynamicResource SecondaryTextBrush}"
-                        Background="Transparent"
-                        BorderThickness="0"
-                        Width="44"
-                        Cursor="Hand"
-                        Click="CloseButton_Click"
-                        ToolTip="Закрити">
-
+                <Button Grid.Column="1" Content="&#xE8BB;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Background="Transparent" BorderThickness="0" Width="44" Cursor="Hand" Click="CloseButton_Click" ToolTip="Закрити">
                     <Button.Template>
                         <ControlTemplate TargetType="Button">
-                            <Border x:Name="ButtonBorder"
-                                    Background="{TemplateBinding Background}"
-                                    CornerRadius="0,12,0,0">
-
-                                <ContentPresenter
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"/>
+                            <Border x:Name="ButtonBorder" Background="{TemplateBinding Background}" CornerRadius="0,12,0,0">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
-
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="ButtonBorder"
-                                            Property="Background"
-                                            Value="{DynamicResource ButtonHoverBrush}"/>
+                                    <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource ButtonHoverBrush}"/>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
@@ -102,210 +56,92 @@
                 </Button>
             </Grid>
 
-            <StackPanel Grid.Row="1"
-                        Margin="22,18,22,12">
-
-                <TextBlock Text="Оформлення програми"
-                           FontSize="20"
-                           FontWeight="SemiBold"
-                           Foreground="{DynamicResource HeadingTextBrush}"/>
-
-                <TextBlock Text="Налаштуйте зовнішній вигляд та фонове зображення."
-                           FontSize="12"
-                           Foreground="{DynamicResource SecondaryTextBrush}"
-                           Margin="0,5,0,0"
-                           TextWrapping="Wrap"/>
+            <StackPanel Grid.Row="1" Margin="22,18,22,12">
+                <TextBlock Text="Оформлення програми" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource HeadingTextBrush}"/>
+                <TextBlock Text="Налаштуйте зовнішній вигляд та фонове зображення." FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,5,0,0" TextWrapping="Wrap"/>
             </StackPanel>
 
-            <ScrollViewer Grid.Row="2"
-                          VerticalScrollBarVisibility="Auto"
-                          HorizontalScrollBarVisibility="Disabled"
-                          Margin="22,0,22,8">
-
+            <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="22,0,22,8">
                 <StackPanel>
-
-                    <Border Background="{DynamicResource CardBackgroundBrush}"
-                            BorderBrush="{DynamicResource SecondaryBorderBrush}"
-                            BorderThickness="1"
-                            CornerRadius="10"
-                            Padding="14"
-                            Margin="0,0,0,18">
-
+                    <Border Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource SecondaryBorderBrush}" BorderThickness="1" CornerRadius="10" Padding="14" Margin="0,0,0,18">
                         <StackPanel>
-
-                            <StackPanel Orientation="Horizontal"
-                                        Margin="0,0,0,6">
-
-                                <Border Width="34"
-                                        Height="34"
-                                        CornerRadius="9"
-                                        Background="{DynamicResource SelectedCardBackgroundBrush}"
-                                        Margin="0,0,10,0">
-
-                                    <TextBlock Text="&#xE91B;"
-                                               FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets"
-                                               FontSize="16"
-                                               Foreground="{DynamicResource AccentBrush}"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                <Border Width="34" Height="34" CornerRadius="9" Background="{DynamicResource SelectedCardBackgroundBrush}" Margin="0,0,10,0">
+                                    <TextBlock Text="&#xE91B;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="16" Foreground="{DynamicResource AccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Border>
-
                                 <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="Фонове зображення"
-                                               FontSize="14"
-                                               FontWeight="SemiBold"
-                                               Foreground="{DynamicResource HeadingTextBrush}"/>
-
-                                    <TextBlock Text="Персоналізуйте вигляд програми"
-                                               FontSize="11"
-                                               Foreground="{DynamicResource SecondaryTextBrush}"
-                                               Margin="0,3,0,0"/>
+                                    <TextBlock Text="Фонове зображення" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource HeadingTextBrush}"/>
+                                    <TextBlock Text="Персоналізуйте вигляд програми" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,3,0,0"/>
                                 </StackPanel>
                             </StackPanel>
 
-                            <TextBlock Text="Виберіть зображення, яке відображатиметься на фоні головного вікна."
-                                       FontSize="11"
-                                       Foreground="{DynamicResource SecondaryTextBrush}"
-                                       TextWrapping="Wrap"
-                                       Margin="0,8,0,14"/>
+                            <TextBlock Text="Виберіть зображення, яке відображатиметься на фоні головного вікна." FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" TextWrapping="Wrap" Margin="0,8,0,14"/>
 
-                            <Border Background="{DynamicResource CardSecondaryBackgroundBrush}"
-                                    BorderBrush="{DynamicResource SecondaryBorderBrush}"
-                                    BorderThickness="1"
-                                    CornerRadius="8"
-                                    Padding="9"
-                                    Margin="0,0,0,12"
-                                    Visibility="{Binding HasBackgroundImage,
-                                        RelativeSource={RelativeSource AncestorType={x:Type Window}},
-                                        Converter={StaticResource BooleanToVisibilityConverter}}">
-
+                            <!-- Блок прев'ю встановленого фону -->
+                            <Border Background="{DynamicResource CardSecondaryBackgroundBrush}" BorderBrush="{DynamicResource SecondaryBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="9" Margin="0,0,0,12" 
+                                    Visibility="{Binding HasBackgroundImage, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="52"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <Border Grid.Column="0"
-                                            Width="48"
-                                            Height="48"
-                                            CornerRadius="6"
-                                            ClipToBounds="True"
-                                            Background="{DynamicResource WindowBackgroundBrush}">
-
-                                        <Image Source="{Binding BackgroundImagePath,
-                                                        RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
-                                               Stretch="UniformToFill"/>
+                                    <Border Grid.Column="0" Width="48" Height="48" CornerRadius="6" ClipToBounds="True" Background="{DynamicResource WindowBackgroundBrush}">
+                                        <Image Source="{Binding BackgroundImagePath}" Stretch="UniformToFill"/>
                                     </Border>
 
-                                    <StackPanel Grid.Column="1"
-                                                VerticalAlignment="Center"
-                                                Margin="11,0,0,0">
-
-                                        <TextBlock Text="ФОН ВСТАНОВЛЕНО"
-                                                   FontSize="10"
-                                                   FontWeight="SemiBold"
-                                                   Foreground="{DynamicResource AccentBrush}"
-                                                   Margin="0,0,0,4"/>
-
-                                        <TextBlock Text="{Binding BackgroundImageName,
-                                                          RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
-                                                   FontSize="12"
-                                                   FontWeight="SemiBold"
-                                                   Foreground="{DynamicResource PrimaryTextBrush}"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   ToolTip="{Binding BackgroundImagePath,
-                                                             RelativeSource={RelativeSource AncestorType={x:Type Window}}}"/>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="11,0,0,0">
+                                        <TextBlock Text="ФОН ВСТАНОВЛЕНО" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,4"/>
+                                        <TextBlock Text="{Binding BackgroundImageName}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" TextTrimming="CharacterEllipsis" ToolTip="{Binding BackgroundImagePath}"/>
                                     </StackPanel>
                                 </Grid>
                             </Border>
 
+                            <!-- Блок налаштування прозорості (всередині картки, з'являється тільки коли фон є) -->
+                            <StackPanel Margin="0,0,0,12" Visibility="{Binding HasBackgroundImage, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <Grid Margin="0,0,0,4">
+                                    <TextBlock Text="Інтенсивність затемнення" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                    <TextBlock Text="{Binding BackgroundOpacity, StringFormat={}{0:P0}}" HorizontalAlignment="Right" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                </Grid>
+                                <Slider Value="{Binding BackgroundOpacity}" Minimum="0" Maximum="0.8" TickFrequency="0.05" IsSnapToTickEnabled="False"/>
+                            </StackPanel>
+
+                            <!-- Кнопки керування (Обрати / Очистити) -->
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
 
-                                <Button Grid.Column="0"
-                                        Content="Обрати зображення"
-                                        Click="SelectImage_Click"
-                                        Height="36"
-                                        Padding="10,0"
-                                        HorizontalAlignment="Stretch"
-                                        Background="{DynamicResource AccentBrush}"
-                                        Foreground="{DynamicResource WhiteTextBrush}"
-                                        FontWeight="SemiBold"
-                                        BorderThickness="0"
-                                        Cursor="Hand"
-                                        Margin="0,0,8,0">
-
+                                <Button Grid.Column="0" Content="Обрати зображення" Command="{Binding SelectImageCommand}" Height="36" Padding="10,0" HorizontalAlignment="Stretch" Background="{DynamicResource AccentBrush}" Foreground="{DynamicResource WhiteTextBrush}" FontWeight="SemiBold" BorderThickness="0" Cursor="Hand" Margin="0,0,8,0">
                                     <Button.Template>
                                         <ControlTemplate TargetType="Button">
-                                            <Border x:Name="ImageButtonBorder"
-                                                    Background="{TemplateBinding Background}"
-                                                    CornerRadius="7"
-                                                    Padding="{TemplateBinding Padding}">
-
-                                                <ContentPresenter
-                                                    HorizontalAlignment="Center"
-                                                    VerticalAlignment="Center"/>
+                                            <Border x:Name="ImageButtonBorder" Background="{TemplateBinding Background}" CornerRadius="7" Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                             </Border>
-
                                             <ControlTemplate.Triggers>
                                                 <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter TargetName="ImageButtonBorder"
-                                                            Property="Background"
-                                                            Value="{DynamicResource AccentHoverBrush}"/>
+                                                    <Setter TargetName="ImageButtonBorder" Property="Background" Value="{DynamicResource AccentHoverBrush}"/>
                                                 </Trigger>
-
                                                 <Trigger Property="IsPressed" Value="True">
-                                                    <Setter TargetName="ImageButtonBorder"
-                                                            Property="Opacity"
-                                                            Value="0.8"/>
+                                                    <Setter TargetName="ImageButtonBorder" Property="Opacity" Value="0.8"/>
                                                 </Trigger>
                                             </ControlTemplate.Triggers>
                                         </ControlTemplate>
                                     </Button.Template>
                                 </Button>
 
-                                <Button Grid.Column="1"
-                                        Content="&#xE74D;"
-                                        FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets"
-                                        FontSize="14"
-                                        Width="38"
-                                        Height="36"
-                                        ToolTip="Очистити фонове зображення"
-                                        Click="ClearImage_Click"
-                                        Background="Transparent"
-                                        Foreground="{DynamicResource DangerBrush}"
-                                        BorderBrush="{DynamicResource SecondaryBorderBrush}"
-                                        BorderThickness="1"
-                                        Cursor="Hand"
-                                        Visibility="{Binding HasBackgroundImage,
-                                            RelativeSource={RelativeSource AncestorType={x:Type Window}},
-                                            Converter={StaticResource BooleanToVisibilityConverter}}">
-
+                                <Button Grid.Column="1" Content="&#xE74D;" Command="{Binding ClearImageCommand}" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="14" Width="38" Height="36" ToolTip="Очистити фонове зображення" Background="Transparent" Foreground="{DynamicResource DangerBrush}" BorderBrush="{DynamicResource SecondaryBorderBrush}" BorderThickness="1" Cursor="Hand" 
+                                        Visibility="{Binding HasBackgroundImage, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <Button.Template>
                                         <ControlTemplate TargetType="Button">
-                                            <Border x:Name="ClearButtonBorder"
-                                                    Background="{TemplateBinding Background}"
-                                                    BorderBrush="{TemplateBinding BorderBrush}"
-                                                    BorderThickness="{TemplateBinding BorderThickness}"
-                                                    CornerRadius="7">
-
-                                                <ContentPresenter
-                                                    HorizontalAlignment="Center"
-                                                    VerticalAlignment="Center"/>
+                                            <Border x:Name="ClearButtonBorder" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="7">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                             </Border>
-
                                             <ControlTemplate.Triggers>
                                                 <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter TargetName="ClearButtonBorder"
-                                                            Property="Background"
-                                                            Value="{DynamicResource DangerBackgroundBrush}"/>
-
-                                                    <Setter TargetName="ClearButtonBorder"
-                                                            Property="BorderBrush"
-                                                            Value="{DynamicResource DangerBrush}"/>
+                                                    <Setter TargetName="ClearButtonBorder" Property="Background" Value="{DynamicResource DangerBackgroundBrush}"/>
+                                                    <Setter TargetName="ClearButtonBorder" Property="BorderBrush" Value="{DynamicResource DangerBrush}"/>
                                                 </Trigger>
                                             </ControlTemplate.Triggers>
                                         </ControlTemplate>
@@ -314,107 +150,50 @@
                             </Grid>
                         </StackPanel>
                     </Border>
-
-                    <TextBlock Text="Колірна палітра"
-                               FontSize="14"
-                               FontWeight="SemiBold"
-                               Foreground="{DynamicResource HeadingTextBrush}"
-                               Margin="0,0,0,10"/>
-
-                    <ItemsControl x:Name="ThemesList">
-
+                    
+                    <!-- ВИПРАВЛЕНО ItemsSource -->
+                    <ItemsControl ItemsSource="{Binding Themes}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <UniformGrid Columns="2"/>
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
-
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Button Tag="{Binding Key}"
-                                        Click="ThemeButton_Click"
-                                        Margin="0,0,10,10"
-                                        Padding="12"
-                                        Height="76"
-                                        HorizontalContentAlignment="Stretch"
-                                        Background="{DynamicResource CardBackgroundBrush}"
-                                        Foreground="{DynamicResource PrimaryTextBrush}"
-                                        BorderBrush="{DynamicResource SecondaryBorderBrush}"
-                                        BorderThickness="1"
-                                        Cursor="Hand">
-
+                                <!-- ВИПРАВЛЕНО Command замість Click -->
+                                <Button Command="{Binding DataContext.SelectThemeCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        CommandParameter="{Binding Key}"
+                                        Margin="0,0,10,10" Padding="12" Height="76" HorizontalContentAlignment="Stretch" Background="{DynamicResource CardBackgroundBrush}" Foreground="{DynamicResource PrimaryTextBrush}" BorderBrush="{DynamicResource SecondaryBorderBrush}" BorderThickness="1" Cursor="Hand">
                                     <Button.Template>
                                         <ControlTemplate TargetType="Button">
-                                            <Border x:Name="Card"
-                                                    Background="{TemplateBinding Background}"
-                                                    BorderBrush="{TemplateBinding BorderBrush}"
-                                                    BorderThickness="{TemplateBinding BorderThickness}"
-                                                    CornerRadius="9"
-                                                    Padding="{TemplateBinding Padding}">
-
-                                                <ContentPresenter
-                                                    HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                                    VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                            <Border x:Name="Card" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="9" Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
                                             </Border>
-
                                             <ControlTemplate.Triggers>
-
                                                 <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter TargetName="Card"
-                                                            Property="BorderBrush"
-                                                            Value="{DynamicResource AccentBrush}"/>
+                                                    <Setter TargetName="Card" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
                                                 </Trigger>
-
                                                 <Trigger Property="IsPressed" Value="True">
-                                                    <Setter TargetName="Card"
-                                                            Property="Background"
-                                                            Value="{DynamicResource ButtonPressedBrush}"/>
+                                                    <Setter TargetName="Card" Property="Background" Value="{DynamicResource ButtonPressedBrush}"/>
                                                 </Trigger>
-
                                                 <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                                    <Setter TargetName="Card"
-                                                            Property="BorderBrush"
-                                                            Value="{Binding Accent}"/>
-
-                                                    <Setter TargetName="Card"
-                                                            Property="BorderThickness"
-                                                            Value="2"/>
-
-                                                    <Setter TargetName="Card"
-                                                            Property="Background"
-                                                            Value="{DynamicResource SelectedCardBackgroundBrush}"/>
+                                                    <Setter TargetName="Card" Property="BorderBrush" Value="{Binding Accent}"/>
+                                                    <Setter TargetName="Card" Property="BorderThickness" Value="2"/>
+                                                    <Setter TargetName="Card" Property="Background" Value="{DynamicResource SelectedCardBackgroundBrush}"/>
                                                 </DataTrigger>
-
                                             </ControlTemplate.Triggers>
                                         </ControlTemplate>
                                     </Button.Template>
-
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
-
-                                        <StackPanel Orientation="Horizontal"
-                                                    VerticalAlignment="Center">
-
-                                            <Border Width="8"
-                                                    Height="36"
-                                                    CornerRadius="4"
-                                                    Background="{Binding Accent}"
-                                                    Margin="0,0,12,0"/>
-
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Border Width="8" Height="36" CornerRadius="4" Background="{Binding Accent}" Margin="0,0,12,0"/>
                                             <StackPanel VerticalAlignment="Center">
-
-                                                <TextBlock Text="{Binding Name}"
-                                                           FontSize="12"
-                                                           FontWeight="SemiBold"
-                                                           Foreground="{DynamicResource HeadingTextBrush}"/>
-
-                                                <TextBlock Text="{Binding Description}"
-                                                           FontSize="10"
-                                                           Foreground="{DynamicResource SecondaryTextBrush}"
-                                                           Margin="0,4,0,0"/>
+                                                <TextBlock Text="{Binding Name}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource HeadingTextBrush}"/>
+                                                <TextBlock Text="{Binding Description}" FontSize="10" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4,0,0"/>
                                             </StackPanel>
                                         </StackPanel>
                                     </Grid>
@@ -425,51 +204,25 @@
                 </StackPanel>
             </ScrollViewer>
 
-            <Border Grid.Row="3"
-                    Background="{DynamicResource CardSecondaryBackgroundBrush}"
-                    BorderBrush="{DynamicResource SecondaryBorderBrush}"
-                    BorderThickness="0,1,0,0"
-                    CornerRadius="0,0,12,12">
-
+            <Border Grid.Row="3" Background="{DynamicResource CardSecondaryBackgroundBrush}" BorderBrush="{DynamicResource SecondaryBorderBrush}" BorderThickness="0,1,0,0" CornerRadius="0,0,12,12">
                 <Grid Margin="22,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-
-                    <Button Grid.Column="1"
-                            Content="Готово"
-                            Width="105"
-                            Height="36"
-                            Background="{DynamicResource AccentBrush}"
-                            Foreground="{DynamicResource WhiteTextBrush}"
-                            FontWeight="SemiBold"
-                            BorderThickness="0"
-                            Cursor="Hand"
-                            Click="CloseButton_Click">
-
+                    <!-- Кнопка "Готово" закриває вікно, тому залишаємо Click -->
+                    <Button Grid.Column="1" Content="Готово" Width="105" Height="36" Background="{DynamicResource AccentBrush}" Foreground="{DynamicResource WhiteTextBrush}" FontWeight="SemiBold" BorderThickness="0" Cursor="Hand" Click="CloseButton_Click">
                         <Button.Template>
                             <ControlTemplate TargetType="Button">
-                                <Border x:Name="DoneBorder"
-                                        Background="{TemplateBinding Background}"
-                                        CornerRadius="7">
-
-                                    <ContentPresenter
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"/>
+                                <Border x:Name="DoneBorder" Background="{TemplateBinding Background}" CornerRadius="7">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Border>
-
                                 <ControlTemplate.Triggers>
                                     <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter TargetName="DoneBorder"
-                                                Property="Background"
-                                                Value="{DynamicResource AccentHoverBrush}"/>
+                                        <Setter TargetName="DoneBorder" Property="Background" Value="{DynamicResource AccentHoverBrush}"/>
                                     </Trigger>
-
                                     <Trigger Property="IsPressed" Value="True">
-                                        <Setter TargetName="DoneBorder"
-                                                Property="Background"
-                                                Value="{DynamicResource AccentPressedBrush}"/>
+                                        <Setter TargetName="DoneBorder" Property="Background" Value="{DynamicResource AccentPressedBrush}"/>
                                     </Trigger>
                                 </ControlTemplate.Triggers>
                             </ControlTemplate>

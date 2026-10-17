@@ -2,7 +2,6 @@
 using System.Windows;
 using System.Windows.Threading;
 using DroneFlasher.Configuration;
-using DroneFlasher.Helpers;
 using DroneFlasher.Services.Configuration;
 using DroneFlasher.Services.Firmware;
 using DroneFlasher.Services.Usb;
@@ -62,20 +61,20 @@ public partial class App : Application
 
         string logFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "crash_log.txt");
 
-        string errorText = $"[{DateTime.Now}] КРИТИЧНИЙ ЗБІЙ ({source}):\n" +
-                           $"Помилка: {ex.Message}\n\n" +
-                           $"Стек викликів:\n{ex.StackTrace}\n";
+        string errorText = $"[{DateTime.Now}] Critical Error ({source}):\n" +
+                           $"Error: {ex.Message}\n\n" +
+                           $"Call Stack:\n{ex.StackTrace}\n";
 
         if (ex.InnerException != null)
         {
-            errorText += $"\nВнутрішня помилка:\n{ex.InnerException.Message}\n{ex.InnerException.StackTrace}\n";
+            errorText += $"\nInner Error:\n{ex.InnerException.Message}\n{ex.InnerException.StackTrace}\n";
         }
 
         try
         {
             File.AppendAllText(logFile, errorText + new string('-', 40) + "\n");
 
-            MessageBox.Show(errorText, "Фатальна помилка програми", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(errorText, "Fatal Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
         catch
         {

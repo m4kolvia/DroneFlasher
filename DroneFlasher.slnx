@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="DroneFlasher.Tests/DroneFlasher.Tests.csproj" Id="71d3462f-a612-4568-b560-70aba9efd7a4" />
   <Project Path="DroneFlasher/DroneFlasher.csproj" />
 </Solution>

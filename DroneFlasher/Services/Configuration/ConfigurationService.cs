@@ -24,6 +24,14 @@ public class ConfigurationService
 
     public async Task ApplyConfigurationAsync(string portName, string[] configLines, IProgress<string> statusProgress, IProgress<LogEntry> logProgress, CancellationToken ct = default)
     {
+        var commands = CliCommandFilter.GetValidCommands(configLines);
+
+        if (commands.Count == 0)
+        {
+            logProgress.Report(new LogEntry("У файлі немає команд для виконання.", Brushes.Gold));
+            return;
+        }
+
         using var port = new SerialPort(portName, BaudRate)
         {
             ReadTimeout = 100,
@@ -49,26 +57,6 @@ public class ConfigurationService
             logProgress.Report(new LogEntry($"Помилка підключення: {ex.Message}", Brushes.IndianRed));
         }
 
-        var skippedCommands = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-        {
-            "save", "exit", "reboot", "bl", "bootloader", "batch start", "batch end"
-        };
-
-        var commands = configLines
-            .Select(line => line.Trim())
-            .Where(line => !string.IsNullOrWhiteSpace(line))
-            .Where(line => !line.StartsWith("#"))
-            .Where(line => !skippedCommands.Contains(line))
-            .Where(line => !line.Equals("defaults", OrdinalIgnoreCase))
-            .Where(line => !line.StartsWith("defaults ", OrdinalIgnoreCase))
-            .ToList();
-
-        if (commands.Count == 0)
-        {
-            logProgress.Report(new LogEntry("У файлі немає команд для виконання.", Brushes.Gold));
-            return;
-        }
-
         int totalCommands = commands.Count;
         logProgress.Report(new LogEntry($"Початок відправки {totalCommands} команд...", Brushes.DodgerBlue));
 
@@ -90,9 +78,9 @@ public class ConfigurationService
 
                 string response = await WaitForPromptAsync(port, CommandTimeoutMs, ct);
 
-                if (ContainsCliError(response))
+                if (CliResponseParser.ContainsError(response))
                 {
-                    string errorDetail = ExtractCleanError(response, line);
+                    string errorDetail = CliResponseParser.ExtractCleanError(response, line);
                     logProgress.Report(new LogEntry($"✖ {line} -> {errorDetail}", Brushes.IndianRed));
                 }
                 else
@@ -165,30 +153,7 @@ public class ConfigurationService
         return sb.ToString();
     }
 
-    private static bool ContainsCliError(string response)
-    {
-        if (string.IsNullOrWhiteSpace(response))
-            return false;
-
-        return response.Contains("error", OrdinalIgnoreCase)
-            || response.Contains("###", OrdinalIgnoreCase)
-            || response.Contains("unknown", OrdinalIgnoreCase)
-            || response.Contains("invalid", OrdinalIgnoreCase)
-            || response.Contains("failed", OrdinalIgnoreCase)
-            || response.Contains("parse error", OrdinalIgnoreCase);
-    }
-
-    private static string ExtractCleanError(string response, string originalCommand)
-    {
-        var lines = response.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)
-            .Select(l => l.Trim())
-            .Where(l => !l.Equals(originalCommand, OrdinalIgnoreCase) && !l.StartsWith('#'))
-            .ToList();
-
-        return lines.Count > 0 ? string.Join(" | ", lines) : "ПОМИЛКА CLI";
-    }
-
-    private static void UpdateProgress(IProgress<string> statusProgress, int current, int total)
+    public static void UpdateProgress(IProgress<string> statusProgress, int current, int total)
     {
         if (total <= 0) return;
         int percent = current * 100 / total;

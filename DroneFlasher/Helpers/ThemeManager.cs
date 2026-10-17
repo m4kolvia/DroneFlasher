@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Media;
@@ -25,6 +24,8 @@ namespace DroneFlasher.Helpers
 
         public static string? CurrentBackgroundImage { get; private set; }
 
+        public static double CurrentBackgroundOpacity { get; private set; } = 0.35;
+
         private static readonly string[] AllowedThemes =
         {
             "MidnightBlue",
@@ -45,11 +46,9 @@ namespace DroneFlasher.Helpers
         {
             public string ThemeKey { get; set; } = "Dark";
             public string? BackgroundImagePath { get; set; }
+            public double BackgroundOpacity { get; set; } = 0.35;
         }
 
-        /// <summary>
-        /// Завантажує збережені налаштування під час запуску програми.
-        /// </summary>
         public static void LoadSettings(Window window)
         {
             if (window == null)
@@ -67,6 +66,8 @@ namespace DroneFlasher.Helpers
 
                     if (settings != null)
                     {
+                        CurrentBackgroundOpacity = settings.BackgroundOpacity;
+
                         if (IsThemeAvailable(settings.ThemeKey))
                             themeKey = settings.ThemeKey;
 
@@ -84,10 +85,8 @@ namespace DroneFlasher.Helpers
                 backgroundImage = null;
             }
 
-            // Спочатку застосовуємо тему (кольори палітри)
             ApplyThemePaletteOnly(window, themeKey);
 
-            // Потім, якщо був збережений фон, встановлюємо його (він має пріоритет над кольором теми)
             if (!string.IsNullOrWhiteSpace(backgroundImage))
             {
                 SetBackgroundImage(window, backgroundImage);
@@ -99,15 +98,11 @@ namespace DroneFlasher.Helpers
             }
         }
 
-        /// <summary>
-        /// Застосовує тему до вказаного вікна.
-        /// </summary>
         public static void ApplyTheme(Window window, string themeKey)
         {
             ApplyThemePaletteOnly(window, themeKey);
             SaveSettings();
 
-            // Якщо у нас встановлено фонове зображення, воно залишається головним бекграундом
             if (!string.IsNullOrWhiteSpace(CurrentBackgroundImage))
             {
                 SetBackgroundImage(window, CurrentBackgroundImage);
@@ -118,9 +113,6 @@ namespace DroneFlasher.Helpers
             }
         }
 
-        /// <summary>
-        /// Змінює лише словник ресурсів теми, не чіпаючи фон.
-        /// </summary>
         private static void ApplyThemePaletteOnly(Window window, string themeKey)
         {
             if (window == null)
@@ -165,13 +157,15 @@ namespace DroneFlasher.Helpers
             CurrentThemeKey = themeKey;
         }
 
-        /// <summary>
-        /// Встановлює або очищує фонове зображення.
-        /// </summary>
-        public static void SetBackgroundImage(Window window, string? imagePath)
+        public static void SetBackgroundImage(Window window, string? imagePath, double? opacity = null)
         {
             if (window == null)
                 return;
+
+            if (opacity.HasValue)
+            {
+                CurrentBackgroundOpacity = Math.Clamp(opacity.Value, 0, 1.0);
+            }
 
             if (string.IsNullOrWhiteSpace(imagePath) || !File.Exists(imagePath))
             {
@@ -184,18 +178,16 @@ namespace DroneFlasher.Helpers
             try
             {
                 var bitmap = new BitmapImage();
-
                 bitmap.BeginInit();
                 bitmap.CacheOption = BitmapCacheOption.OnLoad;
                 bitmap.UriSource = new Uri(Path.GetFullPath(imagePath), UriKind.Absolute);
                 bitmap.EndInit();
                 bitmap.Freeze();
 
-                // Оскільки є картинка, повністю вимикаємо колір теми для бекграунду вікна
                 var imageBrush = new ImageBrush(bitmap)
                 {
                     Stretch = Stretch.UniformToFill,
-                    Opacity = 0.35 // Можете змінити насиченість від 0.2 до 0.5 за смаком
+                    Opacity = CurrentBackgroundOpacity 
                 };
 
                 window.Background = imageBrush;
@@ -211,19 +203,13 @@ namespace DroneFlasher.Helpers
             }
         }
 
-        /// <summary>
-        /// Керує станом фону залежно від того, чи вибрана картинка.
-        /// Якщо картинки немає — повертає бекграунд теми (WindowBackgroundBrush).
-        /// </summary>
         private static void ApplyBackgroundState(Window window)
         {
             if (!string.IsNullOrWhiteSpace(CurrentBackgroundImage))
             {
-                // Якщо картинка є — не чіпаємо її
                 return;
             }
 
-            // Якщо картинки немає — повертаємо динамічний колір теми
             if (window.Resources["WindowBackgroundBrush"] is Brush themeBrush)
             {
                 window.Background = themeBrush;
@@ -234,9 +220,6 @@ namespace DroneFlasher.Helpers
             }
         }
 
-        /// <summary>
-        /// Зберігає вибрану тему та шлях до фонового зображення.
-        /// </summary>
         private static void SaveSettings()
         {
             try
@@ -246,7 +229,8 @@ namespace DroneFlasher.Helpers
                 var settings = new ThemeSettings
                 {
                     ThemeKey = CurrentThemeKey,
-                    BackgroundImagePath = CurrentBackgroundImage
+                    BackgroundImagePath = CurrentBackgroundImage,
+                    BackgroundOpacity = CurrentBackgroundOpacity
                 };
 
                 string json = JsonSerializer.Serialize(
@@ -260,7 +244,6 @@ namespace DroneFlasher.Helpers
             }
             catch
             {
-                // Помилка збереження не заважає роботі
             }
         }
 

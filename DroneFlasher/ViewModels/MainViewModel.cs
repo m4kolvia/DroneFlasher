@@ -281,9 +281,6 @@ public class MainViewModel : BaseViewModel
             bool hasFirmware = !string.IsNullOrWhiteSpace(FirmwarePath) && File.Exists(FirmwarePath);
             bool hasDump = !string.IsNullOrWhiteSpace(DumpPath) && File.Exists(DumpPath);
 
-            // -----------------------------------------------------------------
-            // 1. DISCONNECT & CLEANUP PREVIOUS DEVICE
-            // -----------------------------------------------------------------
             if (!string.IsNullOrEmpty(_deviceAwaitingDisconnect))
             {
                 bool isStillPlugged = await Task.Run(() => IsDronePhysicallyConnected());
@@ -308,9 +305,6 @@ public class MainViewModel : BaseViewModel
                 return;
             }
 
-            // -----------------------------------------------------------------
-            // 2. WAIT FOR NEW DEVICE ENUMERATION
-            // -----------------------------------------------------------------
             if (!hasFirmware && !hasDump) return;
 
             if (hasFirmware)
