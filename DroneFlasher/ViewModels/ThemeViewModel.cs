@@ -1,17 +1,16 @@
-﻿using System;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Windows.Input;
 using DroneFlasher.Helpers;
 using DroneFlasher.Models;
-
+    
 namespace DroneFlasher.ViewModels
 {
     public class ThemeViewModel : INotifyPropertyChanged
     {
         private readonly Action<string> _applyThemeAction;
-        private readonly Action<string?, double?> _applyBackgroundAction; // Змінили сигнатуру на прийняття opacity
+        private readonly Action<string?, double?> _applyBackgroundAction; 
         private readonly Func<string?> _openFileDialogFunc;
         private readonly Action<string, string> _showErrorAction;
 
@@ -55,7 +54,6 @@ namespace DroneFlasher.ViewModels
             }
         }
 
-        // Властивість для повзунка (від 5% до 100%)
         public double BackgroundOpacity
         {
             get => _backgroundOpacity;
@@ -65,7 +63,6 @@ namespace DroneFlasher.ViewModels
                 _backgroundOpacity = value;
                 OnPropertyChanged(nameof(BackgroundOpacity));
 
-                // Оновлюємо прозорість "на льоту", якщо фон встановлено
                 if (HasBackgroundImage)
                 {
                     _applyBackgroundAction(BackgroundImagePath, _backgroundOpacity);
@@ -90,7 +87,6 @@ namespace DroneFlasher.ViewModels
             _openFileDialogFunc = openFileDialogFunc;
             _showErrorAction = showErrorAction;
 
-            // Завантажуємо поточне значення з ThemeManager
             _backgroundOpacity = ThemeManager.CurrentBackgroundOpacity;
 
             Themes = new ObservableCollection<ThemeOption>
@@ -109,9 +105,9 @@ namespace DroneFlasher.ViewModels
                 new("Nebula", "Космічний пурпурний", "#C084FC", "Nebula")
             };
 
-            SelectThemeCommand = new RelayCommand<string>(ExecuteSelectTheme);
-            SelectImageCommand = new RelayCommand<object>(_ => ExecuteSelectImage());
-            ClearImageCommand = new RelayCommand<object>(_ => ExecuteClearImage());
+            SelectThemeCommand = new RelayCommand(param => ExecuteSelectTheme(param as string));
+            SelectImageCommand = new RelayCommand(_ => ExecuteSelectImage());
+            ClearImageCommand = new RelayCommand(_ => ExecuteClearImage());
 
             MarkSelectedTheme(ThemeManager.CurrentThemeKey);
             UpdateBackgroundInfo();
@@ -184,14 +180,5 @@ namespace DroneFlasher.ViewModels
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-    }
-
-    public class RelayCommand<T> : ICommand
-    {
-        private readonly Action<T> _execute;
-        public RelayCommand(Action<T> execute) => _execute = execute;
-        public bool CanExecute(object? parameter) => true;
-        public void Execute(object? parameter) => _execute((T)parameter!);
-        public event EventHandler? CanExecuteChanged { add { } remove { } }
     }
 }

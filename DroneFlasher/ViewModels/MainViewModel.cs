@@ -1,18 +1,19 @@
 ﻿using DroneFlasher.Helpers;
 using DroneFlasher.Models;
+using DroneFlasher.Services.Configuration;
+using DroneFlasher.Services.Firmware;
+using DroneFlasher.Services.Usb;
+using LibUsbDotNet.LibUsb;
 using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Ports;
 using System.Windows;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
-using LibUsbDotNet.LibUsb;
-using DroneFlasher.Services.Configuration;
-using DroneFlasher.Services.Firmware;
-using DroneFlasher.Services.Usb;
 
 namespace DroneFlasher.ViewModels;
 
@@ -457,7 +458,6 @@ public class MainViewModel : BaseViewModel
                 d.VendorId == 0x2E3C || // Artery AT32
                 d.VendorId == 0x1A86 || // CH340
                 d.VendorId == 0x10C4 || // CP2102
-                d.VendorId == 0x2341 || // Arduino
                 d.VendorId == 0x0403    // FTDI
             );
         }
@@ -475,21 +475,18 @@ public class MainViewModel : BaseViewModel
         bool firmwareExists = hasFirmwareText && File.Exists(FirmwarePath);
         bool dumpExists = hasDumpText && File.Exists(DumpPath);
 
-        // 1. Якщо хоча б один файл дійсно існує на диску -> Готові до роботи
         if (firmwareExists || dumpExists)
         {
             UpdateStatus("Автозапуск: очікування дрона...", Brushes.DodgerBlue);
             return;
         }
 
-        // 2. Якщо шлях вписаний, але файл НЕ існує (наприклад, обрізали букви) -> ПОМИЛКА
         if (hasFirmwareText || hasDumpText)
         {
             UpdateStatus("Помилка: файл не знайдено!", Brushes.IndianRed);
             return;
         }
 
-        // 3. Якщо обидва поля повністю порожні -> Прохання обрати
         UpdateStatus("Оберіть прошивку або конфігурацію!", Brushes.Orange);
     }
     #endregion

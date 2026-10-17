@@ -1,9 +1,8 @@
-﻿using System;
+﻿using DroneFlasher.Helpers;
+using DroneFlasher.ViewModels;
+using Microsoft.Win32;
 using System.Windows;
 using System.Windows.Input;
-using Microsoft.Win32;
-using DroneFlasher.Helpers;
-using DroneFlasher.ViewModels;
 
 namespace DroneFlasher.Views
 {
