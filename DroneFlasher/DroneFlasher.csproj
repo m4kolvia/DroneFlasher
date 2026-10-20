@@ -10,8 +10,8 @@
 
 		<PlatformTarget>x64</PlatformTarget>
 
-		<ApplicationIcon>app.ico</ApplicationIcon>
-		<AssemblyName>Рука допомоги</AssemblyName>
+		<ApplicationIcon>Assets\app.ico</ApplicationIcon>
+		<AssemblyName>DroneFlasher</AssemblyName>
 
 		<RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
 
@@ -21,9 +21,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<EmbeddedResource Include="Native\x64\libusb-1.0.dll">
+		<EmbeddedResource Include="Libs\libusb-1.0.dll">
 		</EmbeddedResource>
-		<Resource Include="app.ico" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -33,8 +32,8 @@
 		<PackageReference Include="System.IO.Ports" Version="10.0.11" />
 		<PackageReference Include="System.Management" Version="10.0.11" />
 	</ItemGroup>
-
 	<ItemGroup>
+		<Resource Include="Assets\app.ico" />
 		<ApplicationDefinition Update="App.xaml">
 			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
 		</ApplicationDefinition>

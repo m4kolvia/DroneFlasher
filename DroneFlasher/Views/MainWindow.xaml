@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:DroneFlasher.ViewModels"
         xmlns:helpers="clr-namespace:DroneFlasher.Helpers"
-        Title="Рука допомоги"
+        Title="DroneFlasher"
         Height="580"
         Width="980"
         Background="{DynamicResource WindowBackgroundBrush}"
@@ -316,15 +316,10 @@
             <StackPanel Grid.Column="0"
                         Orientation="Horizontal"
                         VerticalAlignment="Center"
-                        Margin="22,0,0,0">
-                <Image Source="/app.ico"
-                       Width="46" Height="46"
-                       Stretch="Uniform"
-                       VerticalAlignment="Center"
-                       Margin="0,0,12,0"/>
-                <TextBlock Text="РУКА ДОПОМОГИ"
+                        Margin="26,0,0,0">
+                <TextBlock Text="DroneFlasher"
                            Foreground="{DynamicResource PrimaryTextBrush}"
-                           FontSize="13"
+                           FontSize="14"
                            FontWeight="Bold"
                            VerticalAlignment="Center"/>
             </StackPanel>

@@ -9,6 +9,8 @@ namespace DroneFlasher.ViewModels
 {
     public class ThemeViewModel : INotifyPropertyChanged
     {
+        public ObservableCollection<ThemeOption> Themes { get; }
+        public event PropertyChangedEventHandler? PropertyChanged;
         private readonly Action<string> _applyThemeAction;
         private readonly Action<string?, double?> _applyBackgroundAction; 
         private readonly Func<string?> _openFileDialogFunc;
@@ -19,7 +21,52 @@ namespace DroneFlasher.ViewModels
         private string _backgroundImageName = string.Empty;
         private double _backgroundOpacity = 0.2;
 
-        public ObservableCollection<ThemeOption> Themes { get; }
+        public ICommand SelectThemeCommand { get; }
+        public ICommand SelectImageCommand { get; }
+        public ICommand ClearImageCommand { get; }
+
+        public ThemeViewModel(
+            Action<string> applyThemeAction,
+            Action<string?, double?> applyBackgroundAction,
+            Func<string?> openFileDialogFunc,
+            Action<string, string> showErrorAction)
+        {
+            _applyThemeAction = applyThemeAction;
+            _applyBackgroundAction = applyBackgroundAction;
+            _openFileDialogFunc = openFileDialogFunc;
+            _showErrorAction = showErrorAction;
+
+            _backgroundOpacity = ThemeManager.CurrentBackgroundOpacity;
+
+            Themes = new ObservableCollection<ThemeOption>
+            {
+                new("Dark", "Темна тема", "#111114", "Dark"),
+                new("Light", "Світле оформлення", "#2563EB", "Light"),
+                new("Sunset", "Захід сонця", "#FF8A4C", "Sunset"),
+                new("Midnight Blue", "Глибокий синій", "#2563EB", "MidnightBlue"),
+                new("Arctic", "Холодний блакитний", "#38BDF8", "Arctic"),
+                new("Forest", "Зелений ліс", "#22C55E", "Forest"),
+                new("Amethyst", "Фіолетовий", "#A78BFA", "Amethyst"),
+                new("Crimson", "Насичений червоний", "#F43F5E", "Crimson"),
+                new("Amber", "Теплий бурштиновий", "#F59E0B", "Amber"),
+                new("Graphite", "Стриманий графіт", "#9CA3AF", "Graphite"),
+                new("Cyber Teal", "Кібер-бірюзовий", "#2DD4BF", "CyberTeal"),
+                new("Nebula", "Космічний пурпурний", "#C084FC", "Nebula")
+            };
+
+            SelectThemeCommand = new RelayCommand(param =>
+            {
+                if (param is string themeKey)
+                {
+                    ExecuteSelectTheme(themeKey);
+                }
+            });
+            SelectImageCommand = new RelayCommand(_ => ExecuteSelectImage());
+            ClearImageCommand = new RelayCommand(_ => ExecuteClearImage());
+
+            MarkSelectedTheme(ThemeManager.CurrentThemeKey);
+            UpdateBackgroundInfo();
+        }
 
         public bool HasBackgroundImage
         {
@@ -69,50 +116,6 @@ namespace DroneFlasher.ViewModels
                 }
             }
         }
-
-        public ICommand SelectThemeCommand { get; }
-        public ICommand SelectImageCommand { get; }
-        public ICommand ClearImageCommand { get; }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        public ThemeViewModel(
-            Action<string> applyThemeAction,
-            Action<string?, double?> applyBackgroundAction,
-            Func<string?> openFileDialogFunc,
-            Action<string, string> showErrorAction)
-        {
-            _applyThemeAction = applyThemeAction;
-            _applyBackgroundAction = applyBackgroundAction;
-            _openFileDialogFunc = openFileDialogFunc;
-            _showErrorAction = showErrorAction;
-
-            _backgroundOpacity = ThemeManager.CurrentBackgroundOpacity;
-
-            Themes = new ObservableCollection<ThemeOption>
-            {
-                new("Dark", "Темна тема", "#111114", "Dark"),
-                new("Light", "Світле оформлення", "#2563EB", "Light"),
-                new("Sunset", "Захід сонця", "#FF8A4C", "Sunset"),
-                new("Midnight Blue", "Глибокий синій", "#2563EB", "MidnightBlue"),
-                new("Arctic", "Холодний блакитний", "#38BDF8", "Arctic"),
-                new("Forest", "Зелений ліс", "#22C55E", "Forest"),
-                new("Amethyst", "Фіолетовий", "#A78BFA", "Amethyst"),
-                new("Crimson", "Насичений червоний", "#F43F5E", "Crimson"),
-                new("Amber", "Теплий бурштиновий", "#F59E0B", "Amber"),
-                new("Graphite", "Стриманий графіт", "#9CA3AF", "Graphite"),
-                new("Cyber Teal", "Кібер-бірюзовий", "#2DD4BF", "CyberTeal"),
-                new("Nebula", "Космічний пурпурний", "#C084FC", "Nebula")
-            };
-
-            SelectThemeCommand = new RelayCommand(param => ExecuteSelectTheme(param as string));
-            SelectImageCommand = new RelayCommand(_ => ExecuteSelectImage());
-            ClearImageCommand = new RelayCommand(_ => ExecuteClearImage());
-
-            MarkSelectedTheme(ThemeManager.CurrentThemeKey);
-            UpdateBackgroundInfo();
-        }
-
         private void ExecuteSelectTheme(string themeKey)
         {
             if (string.IsNullOrEmpty(themeKey)) return;
