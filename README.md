@@ -1,6 +1,8 @@
+> [!NOTE]
+> 🧪 **Status:** UI, theme customization, and config handling (Dump/Diff) are fully completed. The firmware flashing module is currently undergoing practical hardware testing.
+
 <div align="center">
   <h1>DroneFlasher</h1>
-
   <img
     src="https://github.com/user-attachments/assets/0dfcea53-07e5-4a13-b9b5-e77664630f9c"
     width="64"
